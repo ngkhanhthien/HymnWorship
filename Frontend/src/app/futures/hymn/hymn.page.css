@@ -1,178 +1,137 @@
-/* ===== HYMN PAGE LAYOUT ===== */
-.hymn-page-layout {
+.hymn-layout {
   display: grid;
   grid-template-columns: 1fr 320px;
-  gap: 0;
+  gap: 16px;
+  padding: 16px;
   height: 100%;
-  min-height: 500px;
 }
 
-/* ===== LEFT PANEL ===== */
+/* ── Left Panel ── */
 .hymn-content-panel {
-  border: 2px solid #16a34a; /* green border as in image */
+  border: 2px solid #2563a8;
+  border-radius: 4px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  min-height: 400px;
 }
 
-/* Tabs */
-.hymn-tabs {
+.tab-bar {
   display: flex;
-  border-bottom: 2px solid #16a34a;
+  gap: 4px;
+  margin-bottom: 12px;
 }
 
-.hymn-tab {
-  padding: 10px 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
+.tab-btn {
+  padding: 8px 18px;
+  border: 2px solid #c0392b;
   background: transparent;
+  color: #1a3a5c;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 2px;
   transition: background 0.2s, color 0.2s;
-  color: #374151;
 }
 
-.hymn-tab--active {
-  background: #1e3a5f;  /* dark navy, matching image */
+.tab-btn.active {
+  background: #1a3a5c;
   color: #fff;
+  border-color: #1a3a5c;
 }
 
-.hymn-tab:not(.hymn-tab--active):hover {
-  background: #f3f4f6;
-}
-
-.hymn-tab-body {
+.tab-body {
   flex: 1;
-  padding: 16px;
 }
 
-/* ===== RIGHT PANEL ===== */
+/* ── Right Panel ── */
 .hymn-notes-panel {
-  border: 2px solid #be185d; /* pink/magenta border as in image */
+  border: 2px solid #c0392b;
+  border-radius: 4px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  background: #fdf2f8;
-  padding: 16px;
   gap: 12px;
+  background: #fafafa;
 }
 
-.hymn-notes-title {
-  font-size: 1rem;
+.notes-title {
+  font-size: 15px;
   font-weight: 700;
-  color: #be185d;
-  letter-spacing: 0.05em;
+  color: #c0392b;
   margin: 0;
+  letter-spacing: 0.5px;
 }
 
-/* Notes input */
-.hymn-notes-input-wrapper {
+.note-input-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 10px;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 10px 12px;
 }
 
-.hymn-notes-input-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.hymn-notes-input {
+.note-input {
   border: none;
   outline: none;
-  background: transparent;
-  width: 100%;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-/* History section */
-.hymn-notes-history {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  background: #f3f4f6;
-  border-radius: 6px;
-  overflow: hidden;
   flex: 1;
+  font-size: 14px;
+  color: #555;
 }
 
-.hymn-notes-history-label {
-  font-size: 0.8rem;
+.notes-history { display: flex; flex-direction: column; gap: 6px; }
+
+.notes-history-label {
+  font-size: 13px;
   font-weight: 600;
-  color: #374151;
-  padding: 10px 12px 6px;
+  color: #333;
   margin: 0;
 }
 
-.hymn-note-item {
+.notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
-}
-
-.hymn-note-text {
-  font-size: 0.8rem;
-  color: #374151;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.hymn-note-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  margin-left: 8px;
-}
-
-.hymn-note-btn {
-  cursor: pointer;
-  font-size: 0.9rem;
-  line-height: 1;
-  transition: opacity 0.15s;
-}
-
-.hymn-note-btn:hover {
-  opacity: 0.7;
-}
-
-.hymn-note-btn--view {
-  color: #374151;
-}
-
-.hymn-note-btn--delete {
-  color: #dc2626;
-  font-weight: 700;
-}
-
-/* CTA Button */
-.hymn-notes-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   gap: 8px;
-  background: #be185d;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 16px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-top: auto;
 }
 
-.hymn-notes-cta:hover {
-  background: #9d174d;
+.note-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #333;
 }
+
+.note-delete {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.notes-view-all-btn {
+  margin-top: auto;
+  padding: 12px;
+  background: #c0392b;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.notes-view-all-btn:hover { background: #a93226; }
