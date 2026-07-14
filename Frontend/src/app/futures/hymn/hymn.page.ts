@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-hymn',
   standalone: true,
   imports: [CommonModule],
-  template: `<div class="p-6 h-full flex items-center justify-center text-gray-500 italic">Music Page Coming Soon</div>`,
+  templateUrl: './hymn.page.html',
+  styleUrls: ['./hymn.page.css'],
 })
 export class HymnPageComponent {}

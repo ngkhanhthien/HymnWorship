@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+cdimport { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -18,4 +18,4 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   </header>
   `
 })
-export class AppHeaderComponent {}
+export class AppHeaderComponent { }
