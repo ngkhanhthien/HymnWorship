@@ -1,0 +1,54 @@
+src/
+│
+├── app/
+│   │
+│   ├── core/                    # Chỉ chứa những thứ dùng toàn app
+│   │   ├── services/
+│   │   │     hymn.service.ts
+│   │   │     notes.service.ts
+│   │   │     calendar.service.ts
+│   │   │
+│   │   ├── models/
+│   │   │     hymn.ts
+│   │   │     note.ts
+│   │   │     scripture.ts
+│   │   │
+│   │   └── utils/
+│   │
+│   ├── shared/                  # Component dùng lại
+│   │   ├── components/
+│   │   │
+│   │   │     app-header/
+│   │   │     app-footer/
+│   │   │     calendar/
+│   │   │     hymn-card/
+│   │   │     note-editor/
+│   │   │     scripture-list/
+│   │   │     audio-player/
+│   │   │
+│   │   └── pipes/
+│   │
+│   ├── pages/
+│   │
+│   │   ├── home/
+│   │   │      home.page.ts
+│   │   │
+│   │   ├── hymn/
+│   │   │      hymn.page.ts
+│   │   │
+│   │   └── notes/
+│   │          notes.page.ts
+│   │
+│   ├── app.routes.ts
+│   ├── app.ts
+│   ├── app.html
+│   └── app.css
+│
+├── assets/
+│   ├── hymns/
+│   │     music/
+│   │     images/
+│   │
+│   └── icons/
+│
+└── main.ts
