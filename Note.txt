@@ -52,3 +52,16 @@ src/
 │   └── icons/
 │
 └── main.ts
+
+với cấu trức thư mục hiện tại, bạn cần tuân thủ nguyên tắc Dry khi viết code. khi viết cũng cần giải thích code bạn đã viết, và cho tôi một gợi í câu comment mà tôi sẽ commit code với một dòng chính mô tả những thay đổi, thêm vài gạch đầu dòng để giải thích thêm nếu cần. nội dung gợi í cũng cần tuân theo quy tắc này: 5 type
+fix: 
+There was a problem and that problem was fixed with this commit
+feat: 
+There is some sort of new functionality
+refactor: 
+The code functions the same but was rewritten to be cleaner
+chore: 
+Another task, everything else
+docs: 
+Documentation for the code, like comments or other documentation file
+Should be less than 100-250 lines of code changed per commit. Bây giờ chưa cần viết code, chỉ ghi nhớ những nguyên tắc này để tôi chuẩn bị ra lệnh cho bạn viết code. 
