@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-hymn',
@@ -7,4 +10,16 @@ import { Component } from '@angular/core';
   templateUrl: './hymn.page.html',
   styleUrl: './hymn.page.css',
 })
-export class HymnPageComponent {}
+export class HymnPageComponent {
+  private readonly route = inject(ActivatedRoute);
+
+  readonly hymnTitle = toSignal(
+    this.route.queryParamMap.pipe(map((p) => p.get('title') ?? '')),
+    { initialValue: '' }
+  );
+
+  readonly hymnNumber = toSignal(
+    this.route.queryParamMap.pipe(map((p) => p.get('number') ?? '')),
+    { initialValue: '' }
+  );
+}

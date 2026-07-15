@@ -6,7 +6,10 @@
       <button class="tab-btn">Lyrics and Video</button>
     </div>
     <div class="tab-body">
-      <!-- Tab content goes here -->
+      @if (hymnTitle()) {
+        <p class="hymn-now-label">{{ hymnNumber() }}. {{ hymnTitle() }}</p>
+      }
+      <p class="coming-soon-label">Coming Soon</p>
     </div>
   </section>
 

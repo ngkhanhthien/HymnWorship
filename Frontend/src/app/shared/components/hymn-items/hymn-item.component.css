@@ -46,4 +46,9 @@
   color: #2a8a9e;
   font-size: 15px;
   font-weight: 500;
+  cursor: pointer;
+}
+
+.hymn-label:hover {
+  text-decoration: underline;
 }

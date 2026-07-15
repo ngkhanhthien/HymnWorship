@@ -1,4 +1,5 @@
 import { Component, computed, inject, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { HymnPlayerService } from '../../services/hymn-player.service';
 
 @Component({
@@ -13,6 +14,7 @@ export class HymnItemComponent {
   @Input() title = '';
 
   private readonly playerService = inject(HymnPlayerService);
+  private readonly router = inject(Router);
 
   /** True when this item is the one currently playing */
   readonly isPlaying = computed(
@@ -25,5 +27,11 @@ export class HymnItemComponent {
     } else {
       this.playerService.play(this.number);
     }
+  }
+
+  navigateToHymn(): void {
+    this.router.navigate(['/hymn'], {
+      queryParams: { number: this.number, title: this.title },
+    });
   }
 }
