@@ -1,15 +1,19 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
+import { Hymn } from '../../core/models/hymn';
 
 @Injectable({ providedIn: 'root' })
 export class HymnPlayerService {
-  /** The number/id of the currently playing hymn, or null if none is playing */
-  readonly currentPlayingId = signal<string | null>(null);
+  /** The currently playing hymn, or null if none */
+  readonly currentPlaying = signal<Hymn | null>(null);
 
-  play(id: string): void {
-    this.currentPlayingId.set(id);
+  /** Derived: the id of the currently playing hymn (for backward compat) */
+  readonly currentPlayingId = computed(() => this.currentPlaying()?.number ?? null);
+
+  play(hymn: Hymn): void {
+    this.currentPlaying.set(hymn);
   }
 
   stop(): void {
-    this.currentPlayingId.set(null);
+    this.currentPlaying.set(null);
   }
 }

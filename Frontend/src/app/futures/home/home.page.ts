@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HymnItemComponent } from '../../shared/components/hymn-items/hymn-item.component';
 import { CalendarComponent } from '../../shared/components/calendar/calendar';
+import { TODAY_HYMNS } from '../../core/services/hymn.service';
 
 @Component({
   selector: 'app-home',
@@ -10,4 +11,6 @@ import { CalendarComponent } from '../../shared/components/calendar/calendar';
   imports: [CommonModule, RouterModule, HymnItemComponent, CalendarComponent],
   templateUrl: './home.page.html',
 })
-export class HomePageComponent {}
+export class HomePageComponent {
+  readonly todayHymns = TODAY_HYMNS;
+}

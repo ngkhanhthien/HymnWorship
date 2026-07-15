@@ -38,9 +38,9 @@
     <!-- Suggestions List -->
     <div class="mt-auto">
       <h3 class="font-bold text-lg mb-2 text-black">More suggestions:</h3>
-      <app-hymn-item number="1001" title="Come, Thou Fount of Every Blessing" />
-      <app-hymn-item number="1004" title="I Will Walk with Jesus" />
-      <app-hymn-item number="1005" title="His Eye Is on the Sparrow" />
+      @for (hymn of todayHymns; track hymn.number) {
+        <app-hymn-item [number]="hymn.number" [title]="hymn.title" />
+      }
     </div>
   </div>
 </div>

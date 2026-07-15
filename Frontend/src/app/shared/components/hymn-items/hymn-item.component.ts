@@ -25,7 +25,7 @@ export class HymnItemComponent {
     if (this.isPlaying()) {
       this.playerService.stop();
     } else {
-      this.playerService.play(this.number);
+      this.playerService.play({ number: this.number, title: this.title });
     }
   }
 
@@ -35,3 +35,4 @@ export class HymnItemComponent {
     });
   }
 }
+
