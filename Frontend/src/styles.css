@@ -1,3 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "tailwindcss";
+
+.hymn-card {
+  @apply border-2 rounded-2xl p-6 flex flex-col transition-all duration-300;
+}
+
+.hymn-card-music {
+  @apply border-emerald-500 bg-white shadow-sm;
+}
+
+.hymn-card-utility {
+  @apply border-pink-700 bg-white shadow-sm;
+}
