@@ -65,3 +65,5 @@ Another task, everything else
 docs: 
 Documentation for the code, like comments or other documentation file
 Should be less than 100-250 lines of code changed per commit. Bây giờ chưa cần viết code, chỉ ghi nhớ những nguyên tắc này để tôi chuẩn bị ra lệnh cho bạn viết code. 
+
+bạn giúp tôi để tạo một xử lý logic để khi tôi ấn vào nút phát nhạc cho một trong 3 bài nhạc trên homepage thì nó sẽ hiện nút dừng. khi tôi ấn dừng thì nút phát nhạc hình tam giác sẽ hiện lại. Có thể sử dụng tuiIconButton @tui.pause @tui.play trong taiga-ui, nhưng hãy nhớ phần này vẫn là phần dùng chung trong hymn-item
