@@ -5,7 +5,21 @@
     (click)="togglePlay()"
     [attr.aria-label]="isPlaying() ? 'Pause' : 'Play'"
   >
-    {{ isPlaying() ? '⏸' : '▶' }}
+    <!-- Play icon -->
+    @if (!isPlaying()) {
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+        <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.12"/>
+        <polygon points="9,7 19,12 9,17" fill="currentColor"/>
+      </svg>
+    }
+    <!-- Pause icon -->
+    @if (isPlaying()) {
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+        <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.12"/>
+        <rect x="7" y="7" width="3.5" height="10" rx="1" fill="currentColor"/>
+        <rect x="13.5" y="7" width="3.5" height="10" rx="1" fill="currentColor"/>
+      </svg>
+    }
   </button>
   <span class="hymn-label">{{ number }}. {{ title }}</span>
 </div>

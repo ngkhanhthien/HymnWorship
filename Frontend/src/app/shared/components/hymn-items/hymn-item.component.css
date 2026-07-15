@@ -15,17 +15,31 @@
 .play-btn {
   background: none;
   border: none;
-  font-size: 14px;
-  color: #333;
   cursor: pointer;
   flex-shrink: 0;
-  padding: 0;
-  line-height: 1;
-  transition: color 0.2s;
+  padding: 4px;
+  line-height: 0;
+  color: #555;
+  border-radius: 50%;
+  transition: color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-btn:hover {
+  background: rgba(42, 138, 158, 0.1);
+  color: #2a8a9e;
 }
 
 .play-btn.playing {
   color: #2a8a9e;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  display: block;
 }
 
 .hymn-label {
