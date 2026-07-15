@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { map } from 'rxjs';
 import { HymnPlayerService } from '../../shared/services/hymn-player.service';
 import { TODAY_HYMNS } from '../../core/services/hymn.service';
@@ -9,7 +9,7 @@ import { Hymn } from '../../core/models/hymn';
 @Component({
   selector: 'app-hymn',
   standalone: true,
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './hymn.page.html',
   styleUrl: './hymn.page.css',
 })
