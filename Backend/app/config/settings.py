@@ -1,12 +1,30 @@
 """
-Cấu hình trang web cần crawl.
+Crawler configuration.
 """
 
-# ─── Thông tin trang web ───────────────────────────────────────────────────────
-HYMNS_URL = "https://www.churchofjesuschrist.org/media/music/collections/hymns?lang=eng"
-LANGUAGE   = "eng"
+# ─── Base ─────────────────────────────────────────────────────────────────────
+_BASE_URL = "https://www.churchofjesuschrist.org"
+LANGUAGE  = "eng"
 
-# ─── HTTP Headers giả lập trình duyệt thật ────────────────────────────────────
+# ─── Collections to crawl ─────────────────────────────────────────────────────
+# To add a new collection: append one dict with "name", "url", "output_file".
+HYMN_COLLECTIONS = [
+    {
+        "name":        "Hymns",
+        "url":         f"{_BASE_URL}/media/music/collections/hymns?lang={LANGUAGE}",
+        "output_file": "hymns",
+    },
+    {
+        "name":        "Hymns for Home and Church",
+        "url":         f"{_BASE_URL}/media/music/collections/hymns-for-home-and-church?lang={LANGUAGE}",
+        "output_file": "hymns_home_church",
+    },
+]
+
+# Backward-compat alias used by check_connection()
+HYMNS_URL = HYMN_COLLECTIONS[0]["url"]
+
+# ─── HTTP Headers ─────────────────────────────────────────────────────────────
 REQUEST_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -17,16 +35,10 @@ REQUEST_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 
-# ─── Thời gian chờ kết nối (giây) ─────────────────────────────────────────────
+# ─── Timeouts ─────────────────────────────────────────────────────────────────
 REQUEST_TIMEOUT = 15
+JS_RENDER_WAIT  = 10   # seconds to wait for React to render
+JS_SCROLL_PAUSE = 1    # seconds between scroll steps
 
-# ─── Selenium: thời gian chờ trang JS render xong (giây) ──────────────────────
-JS_RENDER_WAIT  = 10   # Chờ trang load lần đầu
-JS_SCROLL_PAUSE = 1    # Chờ giữa các lần scroll
-
-# ─── CSS selector để tìm bài hát trên trang ───────────────────────────────────
-# Trang dùng React, cần lấy từ DOM sau khi JS chạy xong
-HYMN_ITEM_SELECTOR = "li.MusicLibraryItem, li[class*='LibraryItem'], li[class*='musicItem'], div[class*='item']"
-
-# ─── Thư mục lưu output ───────────────────────────────────────────────────────
+# ─── Output ───────────────────────────────────────────────────────────────────
 OUTPUT_DIR = "app/output"
