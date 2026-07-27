@@ -34,6 +34,7 @@ from app.config.settings import (
     JS_DETAIL_WAIT,
     HYMN_DETAIL_CRAWL_LIMIT,
     SHEET_MUSIC_DIR,
+    FORCE_REFRESH_IMAGES,
 )
 
 
@@ -61,6 +62,29 @@ def _normalize_url(url: str) -> str:
 def _normalize_text(text: str) -> str:
     """Clean up non-breaking spaces and en-dashes from scraped text (DRY helper)."""
     return text.replace("\xa0", " ").replace("\u2013", "-").strip()
+
+
+def _touch_file_timestamps(filepath: str) -> None:
+    """
+    Force update Creation Time (ctime) and Modification Time (mtime) of a file to NOW.
+    Uses Windows API (SetFileTime) on Windows to bypass NTFS File System Tunneling.
+    """
+    try:
+        if os.name == "nt":
+            import ctypes
+            from ctypes import wintypes
+            now_ft = int((time.time() + 11644473600) * 10000000)
+            ft = wintypes.FILETIME(now_ft & 0xFFFFFFFF, now_ft >> 32)
+            h = ctypes.windll.kernel32.CreateFileW(
+                filepath, 0x0100, 0, None, 3, 0x02000000, None
+            )
+            if h != -1 and h != 0:
+                ctypes.windll.kernel32.SetFileTime(h, ctypes.byref(ft), ctypes.byref(ft), ctypes.byref(ft))
+                ctypes.windll.kernel32.CloseHandle(h)
+        else:
+            os.utime(filepath, None)
+    except Exception:
+        pass
 
 
 def _build_chrome_options() -> Options:
@@ -161,7 +185,34 @@ def _extract_sheet_music_images(driver: webdriver.Chrome, hymn_id: str) -> list[
     Wait for sheet music canvas element(s) on the detail page and save as PNG file(s).
     File name: <hymn_id>.png (or <hymn_id>_<page>.png if multi-page).
     Saved into SHEET_MUSIC_DIR (e.g. app/output/sheet_music).
+
+    If FORCE_REFRESH_IMAGES is False (default) and file(s) already exist,
+    skips re-exporting canvas and returns existing file path(s).
+    If FORCE_REFRESH_IMAGES is True, deletes existing old file(s) for this hymn_id first,
+    then captures fresh images from the web page and writes new files.
     """
+    # 1. If FORCE_REFRESH_IMAGES is False: reuse existing files if present
+    if not FORCE_REFRESH_IMAGES and os.path.exists(SHEET_MUSIC_DIR):
+        existing = [
+            os.path.join(SHEET_MUSIC_DIR, fname).replace("\\", "/")
+            for fname in sorted(os.listdir(SHEET_MUSIC_DIR))
+            if fname == f"{hymn_id}.png" or re.match(fr"^{re.escape(hymn_id)}_\d+\.png$", fname)
+        ]
+        if existing:
+            print(f"[Crawler] [{hymn_id}] Sheet music image exists — skipping download.")
+            return existing
+
+    # 2. If FORCE_REFRESH_IMAGES is True: delete old files for this hymn_id before re-downloading
+    if os.path.exists(SHEET_MUSIC_DIR):
+        for fname in os.listdir(SHEET_MUSIC_DIR):
+            if fname == f"{hymn_id}.png" or re.match(fr"^{re.escape(hymn_id)}_\d+\.png$", fname):
+                old_file = os.path.join(SHEET_MUSIC_DIR, fname)
+                try:
+                    os.remove(old_file)
+                except Exception:
+                    pass
+
+    # 3. Capture fresh canvas images from live webpage
     saved_paths = []
     try:
         WebDriverWait(driver, JS_DETAIL_WAIT).until(
@@ -181,9 +232,12 @@ def _extract_sheet_music_images(driver: webdriver.Chrome, hymn_id: str) -> list[
                 filepath = os.path.join(SHEET_MUSIC_DIR, filename)
                 with open(filepath, "wb") as f:
                     f.write(img_bytes)
-                saved_paths.append(filepath.replace("\\", "/"))
-    except Exception:
-        pass
+                _touch_file_timestamps(filepath)
+                rel_path = filepath.replace("\\", "/")
+                print(f"[Crawler] [{hymn_id}] Fresh sheet music downloaded & saved -> {rel_path}")
+                saved_paths.append(rel_path)
+    except Exception as e:
+        print(f"[Crawler] Warning: Sheet music image capture for hymn #{hymn_id} skipped or timed out: {e}")
     return saved_paths
 
 
