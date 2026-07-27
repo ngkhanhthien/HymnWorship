@@ -42,7 +42,8 @@ JS_SCROLL_PAUSE = 1    # seconds between scroll steps
 JS_DETAIL_WAIT  = 5    # max seconds to wait for hymn detail h1 to appear (stops early if faster)
 
 # ─── Output & Crawl Limits ───────────────────────────────────────────────────
-OUTPUT_DIR = "app/output"
+OUTPUT_DIR      = "app/output"
+SHEET_MUSIC_DIR = "app/output/sheet_music"
 
 # Number of hymns to crawl detail pages for testing (e.g. 3) or "all" to crawl all hymns
 HYMN_DETAIL_CRAWL_LIMIT = 3

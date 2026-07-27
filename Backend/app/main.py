@@ -70,8 +70,10 @@ def main() -> None:
                 scripts = ", ".join(formatted_scripts)
             else:
                 scripts = "(none)"
+            sheets = ", ".join(h.get("sheet_music", [])) or "(none)"
             print(f"    #{h['id']:>3}  {h['title']}")
-            print(f"          Scriptures: {scripts}")
+            print(f"          Scriptures : {scripts}")
+            print(f"          Sheet Music: {sheets}")
 
         save_json(col["hymns"], col["output_file"])
 

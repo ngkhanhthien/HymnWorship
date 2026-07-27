@@ -9,6 +9,8 @@ Public API:
     crawl_all_collections() -> list     — crawl every collection in settings
 """
 
+import os
+import base64
 import time
 import re
 import requests
@@ -31,6 +33,7 @@ from app.config.settings import (
     JS_SCROLL_PAUSE,
     JS_DETAIL_WAIT,
     HYMN_DETAIL_CRAWL_LIMIT,
+    SHEET_MUSIC_DIR,
 )
 
 
@@ -153,21 +156,56 @@ def _parse_raw_items(raw_items: list[dict]) -> list[dict]:
     return hymns
 
 
-def _crawl_scripture_detail(driver: webdriver.Chrome, hymn_url: str) -> list[dict]:
+def _extract_sheet_music_images(driver: webdriver.Chrome, hymn_id: str) -> list[str]:
     """
-    Navigate to a single hymn detail page and extract all scripture references with links.
+    Wait for sheet music canvas element(s) on the detail page and save as PNG file(s).
+    File name: <hymn_id>.png (or <hymn_id>_<page>.png if multi-page).
+    Saved into SHEET_MUSIC_DIR (e.g. app/output/sheet_music).
+    """
+    saved_paths = []
+    try:
+        WebDriverWait(driver, JS_DETAIL_WAIT).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "canvas"))
+        )
+        canvases = driver.find_elements(By.CSS_SELECTOR, "canvas")
+        if not canvases:
+            return saved_paths
 
-    Selector: li.eden-list-item > a  (under the Scriptures section)
-    Returns a list of scripture dicts, e.g. [{"reference": "Isaiah 60:1-3", "url": "https://..."}]
-    Empty list if none found or page fails to load.
+        os.makedirs(SHEET_MUSIC_DIR, exist_ok=True)
+        for i, canvas in enumerate(canvases):
+            data_url = driver.execute_script("return arguments[0].toDataURL('image/png');", canvas)
+            if data_url and "," in data_url:
+                b64_str = data_url.split(",", 1)[1]
+                img_bytes = base64.b64decode(b64_str)
+                filename = f"{hymn_id}_{i+1}.png" if len(canvases) > 1 else f"{hymn_id}.png"
+                filepath = os.path.join(SHEET_MUSIC_DIR, filename)
+                with open(filepath, "wb") as f:
+                    f.write(img_bytes)
+                saved_paths.append(filepath.replace("\\", "/"))
+    except Exception:
+        pass
+    return saved_paths
+
+
+def _crawl_hymn_detail(driver: webdriver.Chrome, hymn_id: str, hymn_url: str) -> dict:
+    """
+    Navigate to a single hymn detail page and extract scriptures + sheet music images.
+
+    Returns dict:
+        {
+            "scriptures": [{"reference": "...", "url": "..."}, ...],
+            "sheet_music": ["app/output/sheet_music/1.png", ...]
+        }
     """
     try:
         driver.get(hymn_url)
         WebDriverWait(driver, JS_DETAIL_WAIT).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "h1, .eden-headings-h1"))
         )
-        items = driver.find_elements(By.CSS_SELECTOR, "li.eden-list-item a")
+
+        # 1. Scriptures
         scriptures = []
+        items = driver.find_elements(By.CSS_SELECTOR, "li.eden-list-item a")
         for el in items:
             raw_text = el.text.strip()
             if not raw_text:
@@ -177,9 +215,13 @@ def _crawl_scripture_detail(driver: webdriver.Chrome, hymn_url: str) -> list[dic
                 "reference": _normalize_text(raw_text),
                 "url":       _normalize_url(href),
             })
-        return scriptures
+
+        # 2. Sheet music images
+        sheet_music = _extract_sheet_music_images(driver, hymn_id)
+
+        return {"scriptures": scriptures, "sheet_music": sheet_music}
     except Exception:
-        return []
+        return {"scriptures": [], "sheet_music": []}
 
 
 def _crawl_single_page(driver: webdriver.Chrome, url: str, name: str) -> list[dict]:
@@ -214,11 +256,14 @@ def _crawl_single_page(driver: webdriver.Chrome, url: str, name: str) -> list[di
 
     for i, hymn in enumerate(hymns, 1):
         if i <= limit:
-            hymn["scriptures"] = _crawl_scripture_detail(driver, hymn["url"])
+            detail = _crawl_hymn_detail(driver, hymn["id"], hymn["url"])
+            hymn["scriptures"]  = detail["scriptures"]
+            hymn["sheet_music"] = detail["sheet_music"]
             if i % 20 == 0 or i == limit:
-                print(f"[Crawler] [{name}] Scripture progress: {i}/{limit}")
+                print(f"[Crawler] [{name}] Detail progress: {i}/{limit}")
         else:
-            hymn["scriptures"] = []
+            hymn["scriptures"]  = []
+            hymn["sheet_music"] = []
 
     return hymns
 
