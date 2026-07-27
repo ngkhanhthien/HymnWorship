@@ -3,20 +3,20 @@ Crawler configuration.
 """
 
 # ─── Base ─────────────────────────────────────────────────────────────────────
-_BASE_URL = "https://www.churchofjesuschrist.org"
-LANGUAGE  = "eng"
+BASE_URL = "https://www.churchofjesuschrist.org"
+LANGUAGE = "eng"
 
 # ─── Collections to crawl ─────────────────────────────────────────────────────
 # To add a new collection: append one dict with "name", "url", "output_file".
 HYMN_COLLECTIONS = [
     {
         "name":        "Hymns",
-        "url":         f"{_BASE_URL}/media/music/collections/hymns?lang={LANGUAGE}",
+        "url":         f"{BASE_URL}/media/music/collections/hymns?lang={LANGUAGE}",
         "output_file": "hymns",
     },
     {
         "name":        "Hymns for Home and Church",
-        "url":         f"{_BASE_URL}/media/music/collections/hymns-for-home-and-church?lang={LANGUAGE}",
+        "url":         f"{BASE_URL}/media/music/collections/hymns-for-home-and-church?lang={LANGUAGE}",
         "output_file": "hymns_home_church",
     },
 ]

@@ -22,6 +22,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 from app.config.settings import (
+    BASE_URL,
     HYMNS_URL,
     HYMN_COLLECTIONS,
     REQUEST_HEADERS,
@@ -128,7 +129,10 @@ def _parse_raw_items(raw_items: list[dict]) -> list[dict]:
             continue
         seen_ids.add(hymn_id)
 
-        hymns.append({"id": hymn_id, "title": title})
+        # Build full URL — href is relative e.g. /media/music/hymns/1-the-morning-breaks
+        full_url = f"{BASE_URL}{href}" if href.startswith("/") else href
+
+        hymns.append({"id": hymn_id, "title": title, "url": full_url})
 
     hymns.sort(key=lambda h: int(h["id"]))
     return hymns
