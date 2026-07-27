@@ -29,6 +29,8 @@ from app.config.settings import (
     REQUEST_TIMEOUT,
     JS_RENDER_WAIT,
     JS_SCROLL_PAUSE,
+    JS_DETAIL_WAIT,
+    SCRIPTURE_CRAWL_LIMIT,
 )
 
 
@@ -138,6 +140,30 @@ def _parse_raw_items(raw_items: list[dict]) -> list[dict]:
     return hymns
 
 
+def _crawl_scripture_detail(driver: webdriver.Chrome, hymn_url: str) -> list[str]:
+    """
+    Navigate to a single hymn detail page and extract all scripture references.
+
+    Selector: li.eden-list-item > a  (under the Scriptures section)
+    Returns a list of scripture strings, e.g. ["Isaiah 60:1-3", "3 Nephi 16:7-20"]
+    Empty list if none found or page fails to load.
+    """
+    try:
+        driver.get(hymn_url)
+        WebDriverWait(driver, JS_DETAIL_WAIT).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "h1, .eden-headings-h1"))
+        )
+        items = driver.find_elements(By.CSS_SELECTOR, "li.eden-list-item a")
+        # Normalise non-breaking spaces and en-dashes coming from the DOM
+        return [
+            el.text.replace("\xa0", " ").replace("\u2013", "-").strip()
+            for el in items
+            if el.text.strip()
+        ]
+    except Exception:
+        return []
+
+
 def _crawl_single_page(driver: webdriver.Chrome, url: str, name: str) -> list[dict]:
     """
     Navigate to *url* in an already-open driver, wait for JS render,
@@ -156,7 +182,26 @@ def _crawl_single_page(driver: webdriver.Chrome, url: str, name: str) -> list[di
 
     raw   = _extract_raw_items(driver)
     hymns = _parse_raw_items(raw)
-    print(f"[Crawler] [{name}] Found {len(hymns)} hymns.")
+
+    # Determine scripture crawl limit ("all" vs integer count)
+    if isinstance(SCRIPTURE_CRAWL_LIMIT, str) and SCRIPTURE_CRAWL_LIMIT.lower() == "all":
+        limit = len(hymns)
+    elif isinstance(SCRIPTURE_CRAWL_LIMIT, int):
+        limit = max(0, SCRIPTURE_CRAWL_LIMIT)
+    else:
+        limit = len(hymns)
+
+    limit_desc = "ALL" if limit == len(hymns) else f"first {limit}"
+    print(f"[Crawler] [{name}] Found {len(hymns)} hymns. Crawling scriptures for {limit_desc} hymn(s)...")
+
+    for i, hymn in enumerate(hymns, 1):
+        if i <= limit:
+            hymn["scriptures"] = _crawl_scripture_detail(driver, hymn["url"])
+            if i % 20 == 0 or i == limit:
+                print(f"[Crawler] [{name}] Scripture progress: {i}/{limit}")
+        else:
+            hymn["scriptures"] = []
+
     return hymns
 
 

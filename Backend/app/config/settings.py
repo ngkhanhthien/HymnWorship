@@ -39,6 +39,11 @@ REQUEST_HEADERS = {
 REQUEST_TIMEOUT = 15
 JS_RENDER_WAIT  = 10   # seconds to wait for React to render
 JS_SCROLL_PAUSE = 1    # seconds between scroll steps
+JS_DETAIL_WAIT  = 5    # max seconds to wait for hymn detail h1 to appear (stops early if faster)
 
-# ─── Output ───────────────────────────────────────────────────────────────────
+# ─── Output & Crawl Limits ───────────────────────────────────────────────────
 OUTPUT_DIR = "app/output"
+
+# Limit scripture detail crawling: set to integer (e.g. 3) or "all"
+SCRIPTURE_CRAWL_LIMIT = 3
+

@@ -57,7 +57,9 @@ def main() -> None:
         print(f"  Total : {len(col['hymns'])} hymns")
         print("  Sample (first 3):")
         for h in col["hymns"][:3]:
+            scripts = ", ".join(h.get("scriptures", [])) or "(none)"
             print(f"    #{h['id']:>3}  {h['title']}")
+            print(f"          Scriptures: {scripts}")
 
         save_json(col["hymns"], col["output_file"])
 
