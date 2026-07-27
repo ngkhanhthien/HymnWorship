@@ -34,7 +34,10 @@ from app.config.settings import (
     JS_DETAIL_WAIT,
     HYMN_DETAIL_CRAWL_LIMIT,
     SHEET_MUSIC_DIR,
+    AUDIO_DIR,
+    AUDIO_ACCOMPANIMENT_DIR,
     FORCE_REFRESH_IMAGES,
+    FORCE_REFRESH_AUDIO,
 )
 
 
@@ -241,6 +244,56 @@ def _extract_sheet_music_images(driver: webdriver.Chrome, hymn_id: str) -> list[
     return saved_paths
 
 
+def _extract_accompaniment_audio(driver: webdriver.Chrome, hymn_id: str) -> str | None:
+    """
+    Extract Accompaniment MP3 URL from detail page, download the MP3 file,
+    and save it as <hymn_id>.mp3 inside AUDIO_ACCOMPANIMENT_DIR (e.g. app/output/audio/accompaniment/1.mp3).
+
+    Respects FORCE_REFRESH_AUDIO setting (default False): if <hymn_id>.mp3 already exists,
+    skips downloading and reuses existing file path.
+    Returns relative saved file path (e.g. "app/output/audio/accompaniment/1.mp3") or None if not found/failed.
+    """
+    target_filename = f"{hymn_id}.mp3"
+    target_path = os.path.join(AUDIO_ACCOMPANIMENT_DIR, target_filename)
+    rel_path = target_path.replace("\\", "/")
+
+    # 1. Skip if already exists and FORCE_REFRESH_AUDIO is False
+    if not FORCE_REFRESH_AUDIO and os.path.exists(target_path):
+        print(f"[Crawler] [{hymn_id}] Audio file exists — skipping download.")
+        return rel_path
+
+    # 2. Extract Accompaniment MP3 URL from page DOM
+    try:
+        mp3_links = set(re.findall(r'https?://[^\'"\s<>]+\.mp3[^\'"\s<>]*', driver.page_source))
+        if not mp3_links:
+            return None
+
+        acc_links = [l for l in mp3_links if "accompaniment" in l.lower() and "vocal" not in l.lower()]
+        if not acc_links:
+            acc_links = [l for l in mp3_links if "accompaniment" in l.lower()] or [l for l in mp3_links if "vocal" not in l.lower()] or list(mp3_links)
+
+        audio_url = acc_links[0]
+        os.makedirs(AUDIO_ACCOMPANIMENT_DIR, exist_ok=True)
+
+        # Delete old file if FORCE_REFRESH_AUDIO is True
+        if os.path.exists(target_path):
+            try:
+                os.remove(target_path)
+            except Exception:
+                pass
+
+        response = requests.get(audio_url, headers=REQUEST_HEADERS, timeout=30)
+        if response.status_code == 200:
+            with open(target_path, "wb") as f:
+                f.write(response.content)
+            _touch_file_timestamps(target_path)
+            print(f"[Crawler] [{hymn_id}] Fresh Accompaniment MP3 downloaded & saved -> {rel_path}")
+            return rel_path
+    except Exception as e:
+        print(f"[Crawler] Warning: Accompaniment audio capture for hymn #{hymn_id} skipped or timed out: {e}")
+    return None
+
+
 def _crawl_hymn_detail(driver: webdriver.Chrome, hymn_id: str, hymn_url: str) -> dict:
     """
     Navigate to a single hymn detail page and extract scriptures + sheet music images.
@@ -273,9 +326,16 @@ def _crawl_hymn_detail(driver: webdriver.Chrome, hymn_id: str, hymn_url: str) ->
         # 2. Sheet music images
         sheet_music = _extract_sheet_music_images(driver, hymn_id)
 
-        return {"scriptures": scriptures, "sheet_music": sheet_music}
+        # 3. Audio Accompaniment MP3
+        audio_accompaniment = _extract_accompaniment_audio(driver, hymn_id)
+
+        return {
+            "scriptures":          scriptures,
+            "sheet_music":         sheet_music,
+            "audio_accompaniment": audio_accompaniment,
+        }
     except Exception:
-        return {"scriptures": [], "sheet_music": []}
+        return {"scriptures": [], "sheet_music": [], "audio_accompaniment": None}
 
 
 def _crawl_single_page(driver: webdriver.Chrome, url: str, name: str) -> list[dict]:
@@ -311,13 +371,15 @@ def _crawl_single_page(driver: webdriver.Chrome, url: str, name: str) -> list[di
     for i, hymn in enumerate(hymns, 1):
         if i <= limit:
             detail = _crawl_hymn_detail(driver, hymn["id"], hymn["url"])
-            hymn["scriptures"]  = detail["scriptures"]
-            hymn["sheet_music"] = detail["sheet_music"]
+            hymn["scriptures"]          = detail["scriptures"]
+            hymn["sheet_music"]         = detail["sheet_music"]
+            hymn["audio_accompaniment"] = detail["audio_accompaniment"]
             if i % 20 == 0 or i == limit:
                 print(f"[Crawler] [{name}] Detail progress: {i}/{limit}")
         else:
-            hymn["scriptures"]  = []
-            hymn["sheet_music"] = []
+            hymn["scriptures"]          = []
+            hymn["sheet_music"]         = []
+            hymn["audio_accompaniment"] = None
 
     return hymns
 

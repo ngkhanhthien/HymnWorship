@@ -71,9 +71,11 @@ def main() -> None:
             else:
                 scripts = "(none)"
             sheets = ", ".join(h.get("sheet_music", [])) or "(none)"
+            audio  = h.get("audio_accompaniment") or "(none)"
             print(f"    #{h['id']:>3}  {h['title']}")
             print(f"          Scriptures : {scripts}")
             print(f"          Sheet Music: {sheets}")
+            print(f"          Audio (Acc): {audio}")
 
         save_json(col["hymns"], col["output_file"])
 

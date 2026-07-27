@@ -42,13 +42,19 @@ JS_SCROLL_PAUSE = 1    # seconds between scroll steps
 JS_DETAIL_WAIT  = 5    # max seconds to wait for hymn detail h1 to appear (stops early if faster)
 
 # ─── Output & Crawl Limits ───────────────────────────────────────────────────
-OUTPUT_DIR      = "app/output"
-SHEET_MUSIC_DIR = "app/output/sheet_music"
+OUTPUT_DIR              = "app/output"
+SHEET_MUSIC_DIR         = "app/output/sheet_music"
+AUDIO_DIR               = "app/output/audio"
+AUDIO_ACCOMPANIMENT_DIR = "app/output/audio/accompaniment"
 
 # Number of hymns to crawl detail pages for testing (e.g. 3) or "all" to crawl all hymns
 HYMN_DETAIL_CRAWL_LIMIT = 3
 
 # Force re-download/refresh sheet music images even if they already exist locally.
 # Default: False (skip downloading if file already exists). Set to True to force overwrite.
-FORCE_REFRESH_IMAGES = True
+FORCE_REFRESH_IMAGES = False
+
+# Force re-download/refresh audio MP3 files even if they already exist locally.
+# Default: False (skip downloading if file already exists). Set to True to force overwrite.
+FORCE_REFRESH_AUDIO = False
 
