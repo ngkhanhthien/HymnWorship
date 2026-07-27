@@ -57,7 +57,19 @@ def main() -> None:
         print(f"  Total : {len(col['hymns'])} hymns")
         print("  Sample (first 3):")
         for h in col["hymns"][:3]:
-            scripts = ", ".join(h.get("scriptures", [])) or "(none)"
+            script_items = h.get("scriptures", [])
+            if script_items:
+                formatted_scripts = []
+                for s in script_items:
+                    if isinstance(s, dict):
+                        ref = s.get("reference", "")
+                        url = s.get("url", "")
+                        formatted_scripts.append(f"{ref} ({url})" if url else ref)
+                    else:
+                        formatted_scripts.append(str(s))
+                scripts = ", ".join(formatted_scripts)
+            else:
+                scripts = "(none)"
             print(f"    #{h['id']:>3}  {h['title']}")
             print(f"          Scriptures: {scripts}")
 

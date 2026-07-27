@@ -46,6 +46,20 @@ def _error_result(message: str) -> dict:
     }
 
 
+def _normalize_url(url: str) -> str:
+    """Ensure relative URLs are converted to full URLs with BASE_URL (DRY helper)."""
+    if not url:
+        return ""
+    if url.startswith("/"):
+        return f"{BASE_URL}{url}"
+    return url
+
+
+def _normalize_text(text: str) -> str:
+    """Clean up non-breaking spaces and en-dashes from scraped text (DRY helper)."""
+    return text.replace("\xa0", " ").replace("\u2013", "-").strip()
+
+
 def _build_chrome_options() -> Options:
     """Return headless Chrome options (single source of truth for browser config)."""
     options = Options()
@@ -131,8 +145,7 @@ def _parse_raw_items(raw_items: list[dict]) -> list[dict]:
             continue
         seen_ids.add(hymn_id)
 
-        # Build full URL — href is relative e.g. /media/music/hymns/1-the-morning-breaks
-        full_url = f"{BASE_URL}{href}" if href.startswith("/") else href
+        full_url = _normalize_url(href)
 
         hymns.append({"id": hymn_id, "title": title, "url": full_url})
 
@@ -140,12 +153,12 @@ def _parse_raw_items(raw_items: list[dict]) -> list[dict]:
     return hymns
 
 
-def _crawl_scripture_detail(driver: webdriver.Chrome, hymn_url: str) -> list[str]:
+def _crawl_scripture_detail(driver: webdriver.Chrome, hymn_url: str) -> list[dict]:
     """
-    Navigate to a single hymn detail page and extract all scripture references.
+    Navigate to a single hymn detail page and extract all scripture references with links.
 
     Selector: li.eden-list-item > a  (under the Scriptures section)
-    Returns a list of scripture strings, e.g. ["Isaiah 60:1-3", "3 Nephi 16:7-20"]
+    Returns a list of scripture dicts, e.g. [{"reference": "Isaiah 60:1-3", "url": "https://..."}]
     Empty list if none found or page fails to load.
     """
     try:
@@ -154,12 +167,17 @@ def _crawl_scripture_detail(driver: webdriver.Chrome, hymn_url: str) -> list[str
             EC.presence_of_element_located((By.CSS_SELECTOR, "h1, .eden-headings-h1"))
         )
         items = driver.find_elements(By.CSS_SELECTOR, "li.eden-list-item a")
-        # Normalise non-breaking spaces and en-dashes coming from the DOM
-        return [
-            el.text.replace("\xa0", " ").replace("\u2013", "-").strip()
-            for el in items
-            if el.text.strip()
-        ]
+        scriptures = []
+        for el in items:
+            raw_text = el.text.strip()
+            if not raw_text:
+                continue
+            href = el.get_attribute("href") or ""
+            scriptures.append({
+                "reference": _normalize_text(raw_text),
+                "url":       _normalize_url(href),
+            })
+        return scriptures
     except Exception:
         return []
 
