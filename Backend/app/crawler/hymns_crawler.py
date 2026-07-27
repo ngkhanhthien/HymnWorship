@@ -30,7 +30,7 @@ from app.config.settings import (
     JS_RENDER_WAIT,
     JS_SCROLL_PAUSE,
     JS_DETAIL_WAIT,
-    SCRIPTURE_CRAWL_LIMIT,
+    HYMN_DETAIL_CRAWL_LIMIT,
 )
 
 
@@ -201,16 +201,16 @@ def _crawl_single_page(driver: webdriver.Chrome, url: str, name: str) -> list[di
     raw   = _extract_raw_items(driver)
     hymns = _parse_raw_items(raw)
 
-    # Determine scripture crawl limit ("all" vs integer count)
-    if isinstance(SCRIPTURE_CRAWL_LIMIT, str) and SCRIPTURE_CRAWL_LIMIT.lower() == "all":
+    # Determine hymn detail crawl limit ("all" vs integer count)
+    if isinstance(HYMN_DETAIL_CRAWL_LIMIT, str) and HYMN_DETAIL_CRAWL_LIMIT.lower() == "all":
         limit = len(hymns)
-    elif isinstance(SCRIPTURE_CRAWL_LIMIT, int):
-        limit = max(0, SCRIPTURE_CRAWL_LIMIT)
+    elif isinstance(HYMN_DETAIL_CRAWL_LIMIT, int):
+        limit = max(0, HYMN_DETAIL_CRAWL_LIMIT)
     else:
         limit = len(hymns)
 
     limit_desc = "ALL" if limit == len(hymns) else f"first {limit}"
-    print(f"[Crawler] [{name}] Found {len(hymns)} hymns. Crawling scriptures for {limit_desc} hymn(s)...")
+    print(f"[Crawler] [{name}] Found {len(hymns)} hymns. Crawling detail pages for {limit_desc} hymn(s)...")
 
     for i, hymn in enumerate(hymns, 1):
         if i <= limit:

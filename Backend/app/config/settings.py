@@ -44,6 +44,6 @@ JS_DETAIL_WAIT  = 5    # max seconds to wait for hymn detail h1 to appear (stops
 # ─── Output & Crawl Limits ───────────────────────────────────────────────────
 OUTPUT_DIR = "app/output"
 
-# Limit scripture detail crawling: set to integer (e.g. 3) or "all"
-SCRIPTURE_CRAWL_LIMIT = 3
+# Number of hymns to crawl detail pages for testing (e.g. 3) or "all" to crawl all hymns
+HYMN_DETAIL_CRAWL_LIMIT = 3
 
