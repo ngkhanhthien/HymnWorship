@@ -3,8 +3,6 @@ HymnWorship Backend - Entry Point
 
 How to run from Backend directory:
     python app/main.py
-    or
-    python -m app.main
 """
 
 import sys
@@ -14,32 +12,48 @@ import os
 if sys.stdout.encoding != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
-# Đảm bảo thư mục Backend luôn nằm trong sys.path
-# để import "from app.xxx" hoạt động đúng dù chạy bằng cách nào
+# Ensure Backend/ is always in sys.path so "from app.xxx" imports work
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.crawler.hymns_crawler import check_connection
+from app.crawler.hymns_crawler import check_connection, crawl_hymns
 from app.crawler.save_json import save_json
 
 
 def main() -> None:
-    """Entry point: test connection to website and save result."""
-    print("=" * 50)
-    print("  HymnWorship Crawler - Connection Test")
-    print("=" * 50)
+    """Entry point: verify connection then crawl hymn IDs and titles."""
+    print("=" * 55)
+    print("  HymnWorship Crawler")
+    print("=" * 55)
 
-    # Check connection
-    result = check_connection()
+    # Step 1: Check connection
+    conn = check_connection()
+    print(f"\n  URL      : {conn['url']}")
+    print(f"  Status   : {conn['status_code']}")
+    print(f"  Connected: {'[OK]' if conn['connected'] else '[FAIL]'}")
 
-    # Print result
-    print(f"\n  URL        : {result['url']}")
-    print(f"  Status     : {result['status_code']}")
-    print(f"  Connected  : {'[OK]' if result['connected'] else '[FAIL]'}")
-    print(f"  Message    : {result['message']}")
-    print("=" * 50)
+    if not conn["connected"]:
+        print(f"  Message  : {conn['message']}")
+        print("=" * 55)
+        return
 
-    # Save result to JSON file
-    save_json(result, "connection_test")
+    print("=" * 55)
+
+    # Step 2: Crawl hymn data
+    print("\n[Crawler] Starting hymn crawl...")
+    hymns = crawl_hymns()
+
+    if not hymns:
+        print("[Crawler] No hymns found. Check selectors in settings.py")
+        return
+
+    print(f"\n[Crawler] Total hymns found: {len(hymns)}")
+    print("\n  Sample (first 5):")
+    for h in hymns[:5]:
+        print(f"    #{h['id']:>3}  {h['title']}")
+
+    # Step 3: Save to JSON
+    save_json(hymns, "hymns")
+    print("=" * 55)
 
 
 if __name__ == "__main__":

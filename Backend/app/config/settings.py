@@ -20,5 +20,13 @@ REQUEST_HEADERS = {
 # ─── Thời gian chờ kết nối (giây) ─────────────────────────────────────────────
 REQUEST_TIMEOUT = 15
 
+# ─── Selenium: thời gian chờ trang JS render xong (giây) ──────────────────────
+JS_RENDER_WAIT  = 10   # Chờ trang load lần đầu
+JS_SCROLL_PAUSE = 1    # Chờ giữa các lần scroll
+
+# ─── CSS selector để tìm bài hát trên trang ───────────────────────────────────
+# Trang dùng React, cần lấy từ DOM sau khi JS chạy xong
+HYMN_ITEM_SELECTOR = "li.MusicLibraryItem, li[class*='LibraryItem'], li[class*='musicItem'], div[class*='item']"
+
 # ─── Thư mục lưu output ───────────────────────────────────────────────────────
 OUTPUT_DIR = "app/output"
