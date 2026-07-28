@@ -8,9 +8,10 @@ import google.auth.transport.requests
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-# Đường dẫn tới file service account key trong thư mục key
+# Đường dẫn tới file service account key trong thư mục app/config/key
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-KEY_DIR = os.path.join(BASE_DIR, "key")
+APP_DIR = os.path.dirname(BASE_DIR)
+KEY_DIR = os.path.join(APP_DIR, "config", "key")
 json_files = [f for f in os.listdir(KEY_DIR) if f.endswith(".json")] if os.path.exists(KEY_DIR) else []
 if json_files:
     KEY_PATH = os.path.join(KEY_DIR, json_files[0])

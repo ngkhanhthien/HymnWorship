@@ -1,6 +1,7 @@
 # Firebase & Secret Keys
 **/key/
-Backend/app/firebase/key/
+**/config/key/
+Backend/app/config/key/
 *firebase-adminsdk*.json
 *.key
 *.pem
