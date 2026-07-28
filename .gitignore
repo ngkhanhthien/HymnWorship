@@ -1,0 +1,27 @@
+# Firebase & Secret Keys
+**/key/
+Backend/app/firebase/key/
+*firebase-adminsdk*.json
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
