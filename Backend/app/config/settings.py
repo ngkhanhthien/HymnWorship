@@ -67,9 +67,10 @@ AUDIO_DIR               = "app/output/audio"
 AUDIO_ACCOMPANIMENT_DIR = "app/output/audio/accompaniment"
 
 # Number of hymns to crawl detail pages for testing (e.g. 3) or "all" to crawl all hymns
-HYMN_DETAIL_CRAWL_LIMIT = 3
+HYMN_DETAIL_CRAWL_LIMIT = 5
 
-# Force re-download/refresh sheet music images even if they already exist locally.
+# Force re-download/refresh sh
+# eet music images even if they already exist locally.
 # Default: False (skip downloading if file already exists). Set to True to force overwrite.
 FORCE_REFRESH_IMAGES = False
 
