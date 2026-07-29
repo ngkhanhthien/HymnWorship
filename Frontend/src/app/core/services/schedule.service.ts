@@ -29,7 +29,7 @@ export class ScheduleService {
     const dateKey = this.selectedDate();
     const targetDay = plan.days.find((d) => d.date === dateKey);
 
-    return targetDay ? targetDay.hymns : plan.days[0].hymns;
+    return targetDay ? targetDay.hymns : [];
   });
 
   /** Update currently selected date */

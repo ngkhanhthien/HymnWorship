@@ -13,3 +13,12 @@ tui-calendar {
   font-size: 1.08rem;
 }
 
+/* Light pink background for scheduled day cells */
+:host ::ng-deep [tuiCalendarSheet] [tuiCalendarCell]:has(.tui-calendar-sheet__marker),
+:host ::ng-deep .tui-calendar__cell:has(.tui-calendar__marker),
+:host ::ng-deep [class*="calendar"]:has([style*="ec4899"]),
+:host ::ng-deep button:has([style*="ec4899"]),
+:host ::ng-deep div:has([style*="ec4899"]) {
+  background-color: #fce7f3 !important;
+  border-radius: 50%;
+}

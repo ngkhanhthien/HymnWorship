@@ -37,9 +37,11 @@
 
     <!-- Suggestions List -->
     <div class="mt-auto">
-      <h3 class="font-bold text-lg mb-2 text-black">More suggestions:</h3>
+      <h3 class="font-bold text-lg mb-2 text-black">Hymn suggestions:</h3>
       @for (hymn of scheduledHymns(); track hymn.number) {
         <app-hymn-item [number]="hymn.number" [title]="hymn.title" />
+      } @empty {
+        <p class="text-sm text-gray-400 italic py-2">No hymns scheduled for this date.</p>
       }
     </div>
   </div>
