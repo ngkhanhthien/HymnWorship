@@ -1,24 +1,43 @@
 <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 h-full">
   <!-- Cột Trái (Tiện ích) -->
   <div class="md:col-span-5 flex flex-col gap-6">
-    <!-- Section: Tiện Ích -->
+    <!-- Section: Tiện Ích (Lịch) -->
     <div class="hymn-card hymn-card-utility h-fit !p-3">
       <app-calendar />
     </div>
 
     <!-- Section: Nhật Ký & Ghi Chú -->
-    <div class="hymn-card hymn-card-utility flex-1">
-      <h2 class="text-xl font-bold text-pink-800 mb-6 uppercase">Journal & Notes</h2>
-      <ul class="space-y-6 text-gray-600 text-sm">
-        <li class="flex gap-2">
-          <span class="text-gray-500 mt-0.5">&bull;</span>
-          <span>Experience: Today I feel...</span>
-        </li>
-        <li class="flex gap-2">
-          <span class="text-gray-500 mt-0.5">&bull;</span>
-          <span>To-do: Complete devotional reading.</span>
-        </li>
-      </ul>
+    <div class="hymn-card hymn-card-utility flex-1 flex flex-col justify-between relative">
+      <div class="overflow-y-auto max-h-[320px] pr-1">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-pink-800 uppercase tracking-wide">Journal & Notes</h2>
+          <a routerLink="/notes" class="text-xs font-bold text-pink-700 hover:underline">VIEW ALL &rarr;</a>
+        </div>
+
+        <ul class="space-y-3 text-gray-600 text-sm">
+          @for (note of homeBriefNotes(); track note.id) {
+            <li class="flex flex-col gap-1 bg-pink-50/60 p-2.5 rounded-lg border border-pink-100 transition hover:bg-pink-100/50">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-pink-900">#{{ note.hymnNumber }} &bull; [{{ note.topic }}]</span>
+                <span class="text-gray-400 font-medium">{{ note.date }}</span>
+              </div>
+              <span class="text-gray-700 font-medium line-clamp-2">{{ note.content }}</span>
+            </li>
+          } @empty {
+            <li class="flex items-center gap-2 text-gray-400 italic py-2">
+              <span>&bull;</span>
+              <span>No notes created yet. Add your first note on any Hymn page!</span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <a
+        routerLink="/notes"
+        class="mt-4 sticky bottom-0 block text-center py-2.5 px-4 bg-pink-800 hover:bg-pink-900 text-white font-bold text-xs rounded-lg transition uppercase tracking-wider shadow-sm z-10"
+      >
+        📋 View All Notes
+      </a>
     </div>
   </div>
 
