@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TuiCalendar, tuiCalendarOptionsProvider } from '@taiga-ui/core';
 import { TuiDay } from '@taiga-ui/cdk';
+import { ScheduleService } from '../../../core/services/schedule.service';
 
 @Component({
   selector: 'app-calendar',
@@ -17,9 +18,15 @@ import { TuiDay } from '@taiga-ui/cdk';
   ],
 })
 export class CalendarComponent {
+  private readonly scheduleService = inject(ScheduleService);
   readonly selectedDay = signal<TuiDay | null>(TuiDay.currentLocal());
 
   onDayClick(day: TuiDay): void {
     this.selectedDay.set(day);
+    const year = day.year;
+    const month = String(day.month + 1).padStart(2, '0');
+    const dayNum = String(day.day).padStart(2, '0');
+    const dateStr = `${year}-${month}-${dayNum}`;
+    this.scheduleService.setSelectedDate(dateStr);
   }
 }
