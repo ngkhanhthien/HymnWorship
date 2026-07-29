@@ -55,22 +55,48 @@
   <aside class="hymn-notes-panel">
     <h3 class="notes-title">YOUR NOTES</h3>
 
-    <div class="note-input-wrapper">
-      <span class="note-icon">✏️</span>
-      <input class="note-input" type="text" placeholder="Add a new note..." />
+    <div class="note-input-container">
+      <div class="note-topic-select-wrapper">
+        <label for="noteTopicSelect" class="topic-label">Topic:</label>
+        <select
+          id="noteTopicSelect"
+          class="topic-select"
+          [ngModel]="selectedTopic()"
+          (ngModelChange)="selectedTopic.set($event)"
+        >
+          @for (t of topics; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="note-input-wrapper">
+        <span class="note-icon">✏️</span>
+        <input
+          class="note-input"
+          type="text"
+          placeholder="Add a new note and press Enter..."
+          [ngModel]="noteContent()"
+          (ngModelChange)="noteContent.set($event)"
+          (keyup.enter)="onAddNote()"
+        />
+      </div>
     </div>
 
     <div class="notes-history">
       <p class="notes-history-label">Note history:</p>
       <ul class="notes-list">
-        <li class="note-item">
-          <span class="note-text">Felt at peace while listening to this song... ⇒</span>
-          <button class="note-delete">✖</button>
-        </li>
-        <li class="note-item">
-          <span class="note-text">Need to apply the counsel from Isaiah 60:1... ⇒</span>
-          <button class="note-delete">✖</button>
-        </li>
+        @for (note of currentNotes(); track note.id) {
+          <li class="note-item">
+            <div class="note-content-group">
+              <span class="topic-tag" [attr.data-topic]="note.topic">[{{ note.topic }}]</span>
+              <span class="note-text">{{ note.content }}</span>
+            </div>
+            <button class="note-delete" (click)="onDeleteNote(note.id)">✖</button>
+          </li>
+        } @empty {
+          <li class="empty-notes-msg">No notes added for this song today yet.</li>
+        }
       </ul>
     </div>
 
