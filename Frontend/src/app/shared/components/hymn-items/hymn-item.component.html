@@ -1,25 +1,43 @@
-<div class="hymn-item">
-  <button
-    class="play-btn"
-    [class.playing]="isPlaying()"
-    (click)="togglePlay()"
-    [attr.aria-label]="isPlaying() ? 'Pause' : 'Play'"
-  >
-    <!-- Play icon -->
-    @if (!isPlaying()) {
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
-        <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.12"/>
-        <polygon points="9,7 19,12 9,17" fill="currentColor"/>
-      </svg>
-    }
-    <!-- Pause icon -->
-    @if (isPlaying()) {
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
-        <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.12"/>
-        <rect x="7" y="7" width="3.5" height="10" rx="1" fill="currentColor"/>
-        <rect x="13.5" y="7" width="3.5" height="10" rx="1" fill="currentColor"/>
-      </svg>
-    }
-  </button>
-  <span class="hymn-label" (click)="navigateToHymn()">{{ number }}. {{ title }}</span>
+<div class="hymn-item-wrapper" [class.active-playing]="isCurrentHymn()">
+  <div class="hymn-item">
+    <button
+      class="play-btn"
+      [class.playing]="isPlaying()"
+      (click)="togglePlay()"
+      [attr.aria-label]="isPlaying() ? 'Pause' : 'Play'"
+    >
+      <!-- Play icon -->
+      @if (!isPlaying()) {
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+          <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.12"/>
+          <polygon points="9,7 19,12 9,17" fill="currentColor"/>
+        </svg>
+      }
+      <!-- Pause icon -->
+      @if (isPlaying()) {
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+          <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.12"/>
+          <rect x="7" y="7" width="3.5" height="10" rx="1" fill="currentColor"/>
+          <rect x="13.5" y="7" width="3.5" height="10" rx="1" fill="currentColor"/>
+        </svg>
+      }
+    </button>
+    <span class="hymn-label" (click)="navigateToHymn()">{{ number }}. {{ title }}</span>
+  </div>
+
+  <!-- Music Progress Bar (Only visible when this hymn is played) -->
+  @if (isCurrentHymn()) {
+    <div class="music-progress-container">
+      <span class="time-text">{{ playerService.formatTime(playerService.currentTime()) }}</span>
+      <input
+        type="range"
+        class="progress-slider"
+        min="0"
+        [max]="playerService.duration() || 100"
+        [value]="playerService.currentTime()"
+        (input)="onSeek($event)"
+      />
+      <span class="time-text">{{ playerService.formatTime(playerService.duration()) }}</span>
+    </div>
+  }
 </div>

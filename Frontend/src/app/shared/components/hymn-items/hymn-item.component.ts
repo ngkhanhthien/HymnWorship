@@ -13,18 +13,28 @@ export class HymnItemComponent {
   @Input() number = '';
   @Input() title = '';
 
-  private readonly playerService = inject(HymnPlayerService);
+  protected readonly playerService = inject(HymnPlayerService);
   private readonly router = inject(Router);
 
-  /** True when this item is currently playing audio */
+  /** True when this specific hymn is loaded as active playing hymn */
+  readonly isCurrentHymn = computed(
+    () => this.playerService.currentPlayingId() === this.number
+  );
+
+  /** True when audio is actively playing for this hymn */
   readonly isPlaying = computed(
-    () =>
-      this.playerService.currentPlayingId() === this.number &&
-      this.playerService.isAudioPlaying()
+    () => this.isCurrentHymn() && this.playerService.isAudioPlaying()
   );
 
   togglePlay(): void {
     this.playerService.toggle({ number: this.number, title: this.title });
+  }
+
+  onSeek(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input) {
+      this.playerService.seekTo(Number(input.value));
+    }
   }
 
   navigateToHymn(): void {

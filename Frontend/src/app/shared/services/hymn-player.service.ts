@@ -11,8 +11,20 @@ export class HymnPlayerService {
   /** Playback status: true when audio is actively playing */
   readonly isAudioPlaying = signal<boolean>(false);
 
+  /** Current playback time in seconds */
+  readonly currentTime = signal<number>(0);
+
+  /** Total audio duration in seconds */
+  readonly duration = signal<number>(0);
+
   /** Derived: the number/id of the currently playing hymn */
   readonly currentPlayingId = computed(() => this.currentPlaying()?.number ?? null);
+
+  /** Derived: percentage progress (0 to 100) */
+  readonly progressPercent = computed(() => {
+    const dur = this.duration();
+    return dur > 0 ? (this.currentTime() / dur) * 100 : 0;
+  });
 
   play(hymn: Hymn): void {
     const current = this.currentPlaying();
@@ -37,10 +49,26 @@ export class HymnPlayerService {
     // Create and configure new Audio instance
     this.audio = new Audio(audioUrl);
 
+    this.audio.ontimeupdate = () => {
+      if (this.audio) {
+        this.currentTime.set(this.audio.currentTime);
+        if (this.audio.duration && !isNaN(this.audio.duration)) {
+          this.duration.set(this.audio.duration);
+        }
+      }
+    };
+
+    this.audio.onloadedmetadata = () => {
+      if (this.audio && this.audio.duration && !isNaN(this.audio.duration)) {
+        this.duration.set(this.audio.duration);
+      }
+    };
+
     this.audio.onplay = () => this.isAudioPlaying.set(true);
     this.audio.onpause = () => this.isAudioPlaying.set(false);
     this.audio.onended = () => {
       this.isAudioPlaying.set(false);
+      this.currentTime.set(0);
     };
     this.audio.onerror = (err) => {
       console.warn(`Could not load audio from ${audioUrl}:`, err);
@@ -48,6 +76,9 @@ export class HymnPlayerService {
     };
 
     this.currentPlaying.set(hymn);
+    this.currentTime.set(0);
+    this.duration.set(0);
+
     this.audio.play().catch((err) => {
       console.warn('Audio play failed:', err);
       this.isAudioPlaying.set(false);
@@ -57,6 +88,13 @@ export class HymnPlayerService {
   pause(): void {
     if (this.audio && !this.audio.paused) {
       this.audio.pause();
+    }
+  }
+
+  seekTo(seconds: number): void {
+    if (this.audio) {
+      this.audio.currentTime = seconds;
+      this.currentTime.set(seconds);
     }
   }
 
@@ -77,12 +115,23 @@ export class HymnPlayerService {
     this.stopAudio();
     this.currentPlaying.set(null);
     this.isAudioPlaying.set(false);
+    this.currentTime.set(0);
+    this.duration.set(0);
+  }
+
+  formatTime(seconds: number): string {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
 
   private stopAudio(): void {
     if (this.audio) {
       this.audio.pause();
       this.audio.currentTime = 0;
+      this.audio.ontimeupdate = null;
+      this.audio.onloadedmetadata = null;
       this.audio.onplay = null;
       this.audio.onpause = null;
       this.audio.onended = null;

@@ -3,23 +3,36 @@
   width: 100%;
 }
 
+.hymn-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.hymn-item-wrapper.active-playing {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
 .hymn-item {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 12px 18px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #f9fafb;
   cursor: pointer;
-  transition: all 0.2s ease;
   width: 100%;
   box-sizing: border-box;
 }
 
-.hymn-item:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+.hymn-item-wrapper:hover {
+  border-color: #3b82f6;
 }
 
 .play-btn {
@@ -66,4 +79,51 @@
 .hymn-label:hover {
   color: #2563eb;
   text-decoration: underline;
+}
+
+/* ── Music Progress Bar ── */
+.music-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 18px 12px 18px;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.time-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  min-width: 36px;
+  text-align: center;
+}
+
+.progress-slider {
+  flex: 1;
+  height: 5px;
+  border-radius: 4px;
+  appearance: none;
+  background: #cbd5e1;
+  outline: none;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+.progress-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.progress-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
