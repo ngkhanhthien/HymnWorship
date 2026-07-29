@@ -8,9 +8,16 @@ Backend/app/config/key/
 *.p12
 *.pfx
 
-# Output files
+# Output files & Frontend local assets
 **/output/
 Backend/app/output/
+Frontend/public/assets/hymns/
+**/assets/hymns/
+
+# Documentation, Presentations & Plan files
+*.pptx
+*.pdf
+*PLAN*.md
 
 # Logs
 **/logs/
