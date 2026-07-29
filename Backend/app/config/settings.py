@@ -15,8 +15,7 @@ LOG_LEVEL      = "INFO"
 
 # ─── Base ─────────────────────────────────────────────────────────────────────
 BASE_URL = "https://www.churchofjesuschrist.org"
-LANGUAGE = "eng"
-
+LANGUAGE = "
 # ─── Collections to crawl ─────────────────────────────────────────────────────
 # To add a new collection: append one dict with "name", "url", "output_file".
 HYMN_COLLECTIONS = [
