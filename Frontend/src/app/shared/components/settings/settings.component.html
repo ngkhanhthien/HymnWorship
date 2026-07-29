@@ -1,7 +1,7 @@
 <div class="settings-container">
   <div class="setting-item">
     <label for="data-source-select" class="setting-label">
-      Nguồn dữ liệu (Data Source)
+      Data Source
     </label>
     <select
       id="data-source-select"
@@ -15,5 +15,12 @@
         </option>
       }
     </select>
+    <p class="setting-description">
+      @for (option of settingsService.dataSourceOptions; track option.value) {
+        @if (option.value === settingsService.dataSource()) {
+          {{ option.description }}
+        }
+      }
+    </p>
   </div>
 </div>

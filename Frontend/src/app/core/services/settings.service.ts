@@ -5,6 +5,7 @@ export type DataSourceMode = 'local' | 'firebase';
 export interface DataSourceOption {
   value: DataSourceMode;
   label: string;
+  description: string;
 }
 
 @Injectable({
@@ -12,8 +13,16 @@ export interface DataSourceOption {
 })
 export class SettingsService {
   readonly dataSourceOptions: readonly DataSourceOption[] = [
-    { value: 'local', label: 'Local' },
-    { value: 'firebase', label: 'Firebase' },
+    {
+      value: 'local',
+      label: 'Local (Use local JSON & media files)',
+      description: 'Fetch hymn data, sheet music, and audio directly from local project assets.',
+    },
+    {
+      value: 'firebase',
+      label: 'Firebase (Use Firestore & Cloud Storage)',
+      description: 'Fetch hymn metadata from Firestore and stream media from Firebase Storage.',
+    },
   ];
 
   /** Selected data source mode, default is 'local' */
