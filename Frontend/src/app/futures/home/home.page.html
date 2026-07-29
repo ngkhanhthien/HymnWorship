@@ -38,11 +38,9 @@
     <!-- Suggestions List -->
     <div class="mt-auto">
       <h3 class="font-bold text-lg mb-2 text-black">More suggestions:</h3>
-      @for (hymn of todayHymns; track hymn.number) {
+      @for (hymn of scheduledHymns(); track hymn.number) {
         <app-hymn-item [number]="hymn.number" [title]="hymn.title" />
       }
     </div>
   </div>
 </div>
-
-

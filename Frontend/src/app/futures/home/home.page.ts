@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HymnItemComponent } from '../../shared/components/hymn-items/hymn-item.component';
 import { CalendarComponent } from '../../shared/components/calendar/calendar';
-import { TODAY_HYMNS } from '../../core/services/hymn.service';
+import { ScheduleService } from '../../core/services/schedule.service';
 
 @Component({
   selector: 'app-home',
@@ -12,5 +12,8 @@ import { TODAY_HYMNS } from '../../core/services/hymn.service';
   templateUrl: './home.page.html',
 })
 export class HomePageComponent {
-  readonly todayHymns = TODAY_HYMNS;
+  private readonly scheduleService = inject(ScheduleService);
+
+  /** Reactive signal returning 3 hymns for the selected date on calendar */
+  readonly scheduledHymns = this.scheduleService.selectedDayHymns;
 }
