@@ -13,9 +13,14 @@ LOG_FILE_NAME  = "app.log"
 LOG_FILE_PATH  = os.path.join(LOGS_DIR, LOG_FILE_NAME)
 LOG_LEVEL      = "INFO"
 
+# ─── Firebase Configuration ───────────────────────────────────────────────────
+FIREBASE_KEY_DIR      = os.path.join(APP_DIR, "config", "key")
+STORAGE_BUCKET_NAME   = "qt-hymns.appspot.com"
+FIRESTORE_COLLECTION  = "hymns"
+
 # ─── Base ─────────────────────────────────────────────────────────────────────
 BASE_URL = "https://www.churchofjesuschrist.org"
-LANGUAGE = "
+LANGUAGE = "eng"
 # ─── Collections to crawl ─────────────────────────────────────────────────────
 # To add a new collection: append one dict with "name", "url", "output_file".
 HYMN_COLLECTIONS = [

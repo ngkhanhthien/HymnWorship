@@ -42,10 +42,10 @@ Kế hoạch từng bước tải dữ liệu bài hát, ảnh khuôn nhạc và
 
 ## 📋 Checklist Tiến Độ Kế Hoạch (Auto-Updated Progress Checklist)
 
-- [ ] **Bước 1: Khởi tạo Firebase Client & Storage Bucket Core** (`Backend/app/firebase/client.py`)
-  - [ ] Khai báo `STORAGE_BUCKET_NAME` trong `settings.py`.
-  - [ ] Khởi tạo singleton Firebase Admin, Firestore Client và Storage Bucket.
-  - [ ] Lệnh kiểm tra: `python Backend/app/firebase/client.py`
+- [x] **Bước 1: Khởi tạo Firebase Client & Storage Bucket Core** (`Backend/app/firebase/client.py`)
+  - [x] Khai báo `STORAGE_BUCKET_NAME` trong `settings.py`.
+  - [x] Khởi tạo singleton Firebase Admin, Firestore Client và Storage Bucket.
+  - [x] Lệnh kiểm tra: `python Backend/app/firebase/client.py`
 
 - [ ] **Bước 2: Xây Dựng Module Upload Media Lên Cloud Storage** (`Backend/app/firebase/upload_media.py`)
   - [ ] Đẩy ảnh khuôn nhạc (PNG) và file MP3 lên Storage.
