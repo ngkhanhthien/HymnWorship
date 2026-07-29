@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import glob
 from app.utils.logger import get_logger
@@ -16,8 +17,8 @@ FRONTEND_ASSETS_DIR = os.path.join(WORKSPACE_ROOT, "Frontend", "public", "assets
 
 def sync_output_to_local_assets() -> bool:
     """
-    Synchronizes crawled output JSON files, sheet music images, and audio files
-    from Backend/app/output/ to Frontend/public/assets/hymns/.
+    Combines all crawled JSON files (hymns, hymns_home_church, etc.), sheet music images,
+    and audio files from Backend/app/output/ into Frontend/public/assets/hymns/.
     """
     try:
         if not os.path.exists(OUTPUT_DIR):
@@ -26,21 +27,48 @@ def sync_output_to_local_assets() -> bool:
 
         os.makedirs(FRONTEND_ASSETS_DIR, exist_ok=True)
 
-        # 1. Find the main hymns JSON file in Backend output (prioritizing full collection)
-        json_files = [
-            f for f in glob.glob(os.path.join(OUTPUT_DIR, "hymns_*.json"))
-            if "home_church" not in os.path.basename(f)
-        ]
-        if not json_files:
-            json_files = glob.glob(os.path.join(OUTPUT_DIR, "hymns_*.json"))
+        # 1. Combine all JSON files in Backend output into a single merged hymns.json
+        json_files = glob.glob(os.path.join(OUTPUT_DIR, "*.json"))
+        merged_hymns = []
+        seen_ids = set()
 
         if json_files:
-            latest_json = max(json_files, key=os.path.getmtime)
+            # Sort files by modification time so newer data takes precedence
+            json_files.sort(key=os.path.getmtime)
+
+            for file_path in json_files:
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        if isinstance(data, list):
+                            for item in data:
+                                item_id = str(item.get("id") or item.get("number") or "")
+                                if item_id and item_id not in seen_ids:
+                                    seen_ids.add(item_id)
+                                    merged_hymns.append(item)
+                                elif not item_id:
+                                    merged_hymns.append(item)
+                except Exception as read_err:
+                    logger.warning(f"Could not read JSON file {file_path}: {read_err}")
+
+            # Sort merged hymns by numeric ID
+            def get_numeric_id(hymn: dict) -> int:
+                try:
+                    return int(hymn.get("id") or hymn.get("number") or 0)
+                except (ValueError, TypeError):
+                    return 999999
+
+            merged_hymns.sort(key=get_numeric_id)
+
             dest_json = os.path.join(FRONTEND_ASSETS_DIR, "hymns.json")
-            shutil.copy2(latest_json, dest_json)
-            logger.info(f"Synced JSON: {os.path.basename(latest_json)} -> {dest_json}")
+            with open(dest_json, "w", encoding="utf-8") as f:
+                json.dump(merged_hymns, f, ensure_ascii=False, indent=2)
+
+            logger.info(
+                f"Combined {len(json_files)} JSON files into {dest_json} ({len(merged_hymns)} total unique hymns)."
+            )
         else:
-            logger.warning("No hymns_*.json file found in output directory.")
+            logger.warning("No JSON files found in output directory.")
 
         # 2. Copy sheet_music directory if exists
         sheet_music_src = os.path.join(OUTPUT_DIR, "sheet_music")

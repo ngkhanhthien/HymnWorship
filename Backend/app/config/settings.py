@@ -67,7 +67,7 @@ AUDIO_DIR               = "app/output/audio"
 AUDIO_ACCOMPANIMENT_DIR = "app/output/audio/accompaniment"
 
 # Number of hymns to crawl detail pages for testing (e.g. 3) or "all" to crawl all hymns
-HYMN_DETAIL_CRAWL_LIMIT = 5
+HYMN_DETAIL_CRAWL_LIMIT = "all"
 
 # Force re-download/refresh sh
 # eet music images even if they already exist locally.
