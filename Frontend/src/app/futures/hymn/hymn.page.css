@@ -114,7 +114,7 @@
   margin: 0;
 }
 
-/* ── Right Panel ── */
+/* ── Right Panel (Full Screen Height & Bottom Pinned Button) ── */
 .hymn-notes-panel {
   border: 2px solid #c0392b;
   border-radius: 8px;
@@ -123,6 +123,11 @@
   flex-direction: column;
   gap: 12px;
   background: #fafafa;
+  position: sticky;
+  top: 20px;
+  height: calc(100vh - 110px);
+  align-self: flex-start;
+  box-sizing: border-box;
 }
 
 .notes-title {
@@ -151,7 +156,13 @@
   color: #555;
 }
 
-.notes-history { display: flex; flex-direction: column; gap: 6px; }
+.notes-history {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  flex: 1;
+}
 
 .notes-history-label {
   font-size: 13px;
@@ -202,6 +213,7 @@
   cursor: pointer;
   text-align: center;
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .notes-view-all-btn:hover { background: #a93226; }
