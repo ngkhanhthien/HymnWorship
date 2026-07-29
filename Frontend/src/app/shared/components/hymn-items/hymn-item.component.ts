@@ -16,17 +16,15 @@ export class HymnItemComponent {
   private readonly playerService = inject(HymnPlayerService);
   private readonly router = inject(Router);
 
-  /** True when this item is the one currently playing */
+  /** True when this item is currently playing audio */
   readonly isPlaying = computed(
-    () => this.playerService.currentPlayingId() === this.number
+    () =>
+      this.playerService.currentPlayingId() === this.number &&
+      this.playerService.isAudioPlaying()
   );
 
   togglePlay(): void {
-    if (this.isPlaying()) {
-      this.playerService.stop();
-    } else {
-      this.playerService.play({ number: this.number, title: this.title });
-    }
+    this.playerService.toggle({ number: this.number, title: this.title });
   }
 
   navigateToHymn(): void {
@@ -35,4 +33,3 @@ export class HymnItemComponent {
     });
   }
 }
-
