@@ -76,7 +76,7 @@ export class HymnPageComponent {
     const day = days.find(
       (d) => String(d.hymnNumber) === String(hymnNum) && d.date === todayStr
     );
-    return day ? day.notes : [];
+    return day && Array.isArray(day.notes) ? day.notes : [];
   });
 
   selectTab(tab: 'pdf' | 'lyrics'): void {

@@ -1,0 +1,16 @@
+<div class="notes-page-layout">
+  <header class="notes-page-header">
+    <div>
+      <h1 class="page-title">My Sacred Notes</h1>
+      <p class="page-subtitle">View and manage all spiritual insights, promptings, and gratitude notes</p>
+    </div>
+  </header>
+
+  <main class="notes-page-content">
+    <app-notes-table
+      [notes]="notes()"
+      (editNote)="onEditNote($event)"
+      (deleteNote)="onDeleteNote($event)"
+    />
+  </main>
+</div>
