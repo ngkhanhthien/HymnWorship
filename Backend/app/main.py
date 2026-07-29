@@ -9,7 +9,7 @@ import sys
 import os
 
 # Fix Unicode output on Windows (UTF-8)
-if sys.stdout.encoding != "utf-8":
+if hasattr(sys.stdout, "reconfigure") and sys.stdout.encoding != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
 # Ensure Backend/ is always in sys.path so "from app.xxx" imports work
@@ -17,45 +17,39 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.crawler.hymns_crawler import check_connection, crawl_all_collections
 from app.crawler.save_json import save_json
+from app.utils.logger import get_logger
 
-
-def _print_separator() -> None:
-    print("=" * 55)
+logger = get_logger("main")
 
 
 def main() -> None:
     """Entry point: verify connection then crawl all hymn collections."""
-    _print_separator()
-    print("  HymnWorship Crawler")
-    _print_separator()
+    logger.info("=======================================================")
+    logger.info("  HymnWorship Backend Execution Started")
+    logger.info("=======================================================")
 
     # Step 1: Connection check
     conn = check_connection()
-    print(f"\n  URL      : {conn['url']}")
-    print(f"  Status   : {conn['status_code']}")
-    print(f"  Connected: {'[OK]' if conn['connected'] else '[FAIL]'}")
+    logger.info(f"URL      : {conn['url']}")
+    logger.info(f"Status   : {conn['status_code']}")
+    logger.info(f"Connected: {'[OK]' if conn['connected'] else '[FAIL]'}")
 
     if not conn["connected"]:
-        print(f"  Message  : {conn['message']}")
-        _print_separator()
+        logger.error(f"Connection failed: {conn['message']}")
+        logger.info("=======================================================")
         return
 
-    _print_separator()
-
     # Step 2: Crawl all collections (defined in settings.py)
-    print("\n[Crawler] Starting crawl for all collections...")
+    logger.info("Starting crawl for all collections...")
     collections = crawl_all_collections()
 
     # Step 3: Save each collection to its own JSON file
-    _print_separator()
     for col in collections:
         if not col["hymns"]:
-            print(f"  [{col['name']}] No hymns found — skipping.")
+            logger.warning(f"[{col['name']}] No hymns found — skipping.")
             continue
 
-        print(f"\n  [{col['name']}]")
-        print(f"  Total : {len(col['hymns'])} hymns")
-        print("  Sample (first 3):")
+        logger.info(f"[{col['name']}] Total : {len(col['hymns'])} hymns")
         for h in col["hymns"][:3]:
             script_items = h.get("scriptures", [])
             if script_items:
@@ -72,14 +66,13 @@ def main() -> None:
                 scripts = "(none)"
             sheets = ", ".join(h.get("sheet_music", [])) or "(none)"
             audio  = h.get("audio_accompaniment") or "(none)"
-            print(f"    #{h['id']:>3}  {h['title']}")
-            print(f"          Scriptures : {scripts}")
-            print(f"          Sheet Music: {sheets}")
-            print(f"          Audio (Acc): {audio}")
+            logger.info(f"  #{h['id']:>3} {h['title']} | Scriptures: {scripts} | Sheet Music: {sheets} | Audio: {audio}")
 
         save_json(col["hymns"], col["output_file"])
 
-    _print_separator()
+    logger.info("=======================================================")
+    logger.info("  HymnWorship Backend Execution Completed")
+    logger.info("=======================================================")
 
 
 if __name__ == "__main__":

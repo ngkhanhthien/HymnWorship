@@ -6,6 +6,9 @@ import json
 import os
 from datetime import datetime
 from app.config.settings import OUTPUT_DIR
+from app.utils.logger import get_logger
+
+logger = get_logger("save_json")
 
 
 def save_json(data: dict | list, filename: str) -> str:
@@ -27,5 +30,5 @@ def save_json(data: dict | list, filename: str) -> str:
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    print(f"[Output] Đã lưu file: {filepath}")
+    logger.info(f"[Output] Đã lưu file: {filepath}")
     return filepath

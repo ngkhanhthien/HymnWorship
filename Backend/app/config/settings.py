@@ -1,6 +1,17 @@
+import os
+
 """
 Crawler configuration.
 """
+
+# ─── Base Directories ─────────────────────────────────────────────────────────
+APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# ─── Logging Configuration ───────────────────────────────────────────────────
+LOGS_DIR       = os.path.join(APP_DIR, "logs")
+LOG_FILE_NAME  = "app.log"
+LOG_FILE_PATH  = os.path.join(LOGS_DIR, LOG_FILE_NAME)
+LOG_LEVEL      = "INFO"
 
 # ─── Base ─────────────────────────────────────────────────────────────────────
 BASE_URL = "https://www.churchofjesuschrist.org"
@@ -57,4 +68,5 @@ FORCE_REFRESH_IMAGES = False
 # Force re-download/refresh audio MP3 files even if they already exist locally.
 # Default: False (skip downloading if file already exists). Set to True to force overwrite.
 FORCE_REFRESH_AUDIO = False
+
 

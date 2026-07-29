@@ -8,6 +8,14 @@ Backend/app/config/key/
 *.p12
 *.pfx
 
+# Output files
+**/output/
+Backend/app/output/
+
+# Logs
+**/logs/
+*.log
+
 # Environment variables
 .env
 .env.*
