@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, ParamMap, RouterModule } from '@angular/router';
 import { map } from 'rxjs';
 import { HymnPlayerService } from '../../shared/services/hymn-player.service';
 import { TODAY_HYMNS } from '../../core/services/hymn.service';
@@ -17,9 +17,9 @@ export class HymnPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly playerService = inject(HymnPlayerService);
 
-  private readonly queryHymn = toSignal(
+  private readonly queryHymn = toSignal<Hymn | null>(
     this.route.queryParamMap.pipe(
-      map((p): Hymn | null => {
+      map((p: ParamMap): Hymn | null => {
         const number = p.get('number');
         const title = p.get('title');
         return number && title ? { number, title } : null;
@@ -35,7 +35,7 @@ export class HymnPageComponent {
    * 3. First hymn in today's list
    */
   readonly displayHymn = computed<Hymn>(
-    () =>
+    (): Hymn =>
       this.queryHymn() ??
       this.playerService.currentPlaying() ??
       TODAY_HYMNS[0]
