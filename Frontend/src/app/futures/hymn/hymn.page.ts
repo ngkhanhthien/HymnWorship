@@ -3,13 +3,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, RouterModule } from '@angular/router';
 import { map } from 'rxjs';
 import { HymnPlayerService } from '../../shared/services/hymn-player.service';
-import { TODAY_HYMNS } from '../../core/services/hymn.service';
+import { HymnItemComponent } from '../../shared/components/hymn-items/hymn-item.component';
 import { Hymn } from '../../core/models/hymn';
 
 @Component({
   selector: 'app-hymn',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, HymnItemComponent],
   templateUrl: './hymn.page.html',
   styleUrl: './hymn.page.css',
 })
@@ -30,14 +30,16 @@ export class HymnPageComponent {
 
   /**
    * Priority:
-   * 1. Hymn clicked (query params)
+   * 1. Hymn clicked from query params
    * 2. Currently playing hymn
-   * 3. First hymn in today's list
+   * 3. Fallback default hymn (#1 The Morning Breaks)
    */
   readonly displayHymn = computed<Hymn>(
     (): Hymn =>
       this.queryHymn() ??
-      this.playerService.currentPlaying() ??
-      TODAY_HYMNS[0]
+      this.playerService.currentPlaying() ?? {
+        number: '1',
+        title: 'The Morning Breaks',
+      }
   );
 }

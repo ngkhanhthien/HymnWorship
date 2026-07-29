@@ -10,16 +10,34 @@
 .hymn-content-panel {
   border: 2px solid #2563a8;
   border-radius: 4px;
-  padding: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   min-height: 400px;
 }
 
+.panel-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+}
+
+.top-right-hymn {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 600px;
+  min-width: 300px;
+}
+
 .tab-bar {
   display: flex;
   gap: 4px;
-  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .tab-btn {

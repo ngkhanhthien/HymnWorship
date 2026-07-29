@@ -1,12 +1,21 @@
 <div class="hymn-layout">
-  <!-- Left: Content Tabs -->
+  <!-- Left: Content Panel (Sheet Music & Lyrics) -->
   <section class="hymn-content-panel">
-    <div class="tab-bar">
-      <button class="tab-btn active">PDF Sheet Music</button>
-      <button class="tab-btn">Lyrics and Video</button>
+    <div class="panel-header-row">
+      <div class="tab-bar">
+        <button class="tab-btn active">PDF Sheet Music</button>
+        <button class="tab-btn">Lyrics and Video</button>
+      </div>
+      <!-- Hymn item positioned at top right of the left column -->
+      <div class="top-right-hymn">
+        <app-hymn-item
+          [number]="displayHymn().number"
+          [title]="displayHymn().title"
+        />
+      </div>
     </div>
+
     <div class="tab-body">
-      <p class="hymn-now-label">{{ displayHymn().number }}. {{ displayHymn().title }}</p>
       <p class="coming-soon-label">Coming Soon</p>
     </div>
   </section>

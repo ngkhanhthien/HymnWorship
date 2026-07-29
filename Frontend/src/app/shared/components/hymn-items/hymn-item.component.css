@@ -1,54 +1,69 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .hymn-item {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 16px;
-  border-top: 1px solid #ddd;
+  padding: 12px 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.hymn-item:last-child { border-bottom: 1px solid #ddd; }
-
-.hymn-item:hover { background: #f1f1f1; }
+.hymn-item:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
 
 .play-btn {
   background: none;
   border: none;
   cursor: pointer;
   flex-shrink: 0;
-  padding: 4px;
+  padding: 6px;
   line-height: 0;
-  color: #555;
+  color: #2563eb;
   border-radius: 50%;
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.2s, background 0.2s, transform 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .play-btn:hover {
-  background: rgba(42, 138, 158, 0.1);
-  color: #2a8a9e;
+  background: rgba(37, 99, 235, 0.1);
+  transform: scale(1.08);
 }
 
 .play-btn.playing {
-  color: #2a8a9e;
+  color: #1d4ed8;
 }
 
 .icon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: block;
 }
 
 .hymn-label {
-  color: #2a8a9e;
-  font-size: 15px;
-  font-weight: 500;
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hymn-label:hover {
+  color: #2563eb;
   text-decoration: underline;
 }
