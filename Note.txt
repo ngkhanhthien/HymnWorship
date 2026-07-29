@@ -1,1 +1,14 @@
-Giúp tôi tạo một plan để upload dữ liệu các bài nhạc, file nhạc và file ảnh khuôn nhạc lên firebase. Mục tiêu là chia thành các bước, có thể kiểm tra kết quả từng bước. Mỗi bước thêm code vào phải không quá 250 dòng code, và đảm bảo tuân thủ DRY. File plan để ở thư mục gốc HymnWorship, có check list để xem từng phần nào đã chạy và được cập nhật tự động. Bạn là một kiến trúc sư dữ liệu trên firebase, và cần giúp tôi để đẩy dữ liệu lên đó, nhưng để sau này có thể dễ dàng lấy về cho trang web của tôi. 
+Interface Day {
+id: string; // UUID
+hymnNumber: number;
+date: DateTime; // enforce this to be unique
+noteIds: Note[];
+}
+
+Interface Note {
+id: string; // UUID
+topic: string; // Use an enum to just allow this to have one of three types (MIT, Prompotings, Gratitude)
+content: string;
+}
+
+Tôi muốn tổ chức 2 interface với gợi í như trên, tức là sẽ có các ghi chú cho một ngày của một bài nhạc. và mỗi note sẽ có chủ đề và nội dung. 
