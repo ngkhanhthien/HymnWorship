@@ -1,3 +1,19 @@
 <div class="settings-container">
-  <p class="coming-soon-text">Setting is coming soon...</p>
+  <div class="setting-item">
+    <label for="data-source-select" class="setting-label">
+      Nguồn dữ liệu (Data Source)
+    </label>
+    <select
+      id="data-source-select"
+      class="setting-select"
+      [value]="settingsService.dataSource()"
+      (change)="onDataSourceChange($event)"
+    >
+      @for (option of settingsService.dataSourceOptions; track option.value) {
+        <option [value]="option.value">
+          {{ option.label }}
+        </option>
+      }
+    </select>
+  </div>
 </div>

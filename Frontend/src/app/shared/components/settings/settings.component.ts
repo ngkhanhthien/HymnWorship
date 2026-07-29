@@ -1,16 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SettingsService, DataSourceMode } from '../../../core/services/settings.service';
 
 export const SETTINGS_TITLE = 'Settings';
-export const SETTINGS_CONTENT = 'Setting is coming soon';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
 })
 export class SettingsComponent {
   readonly title = SETTINGS_TITLE;
-  readonly content = SETTINGS_CONTENT;
+  protected readonly settingsService = inject(SettingsService);
+
+  onDataSourceChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    if (selectElement) {
+      this.settingsService.setDataSource(selectElement.value as DataSourceMode);
+    }
+  }
 }
