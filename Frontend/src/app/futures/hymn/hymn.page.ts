@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, RouterModule } from '@angular/router';
 import { map } from 'rxjs';
@@ -16,6 +16,12 @@ import { Hymn } from '../../core/models/hymn';
 export class HymnPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly playerService = inject(HymnPlayerService);
+
+  /** Active Tab signal ('pdf' or 'lyrics'), default is 'pdf' */
+  readonly activeTab = signal<'pdf' | 'lyrics'>('pdf');
+
+  /** Track image load error state */
+  readonly imageError = signal<boolean>(false);
 
   private readonly queryHymn = toSignal<Hymn | null>(
     this.route.queryParamMap.pipe(
@@ -42,4 +48,18 @@ export class HymnPageComponent {
         title: 'The Morning Breaks',
       }
   );
+
+  /** Computed URL for sheet music PNG image */
+  readonly sheetMusicUrl = computed<string>(
+    () => `/assets/hymns/sheet_music/${this.displayHymn().number}.png`
+  );
+
+  selectTab(tab: 'pdf' | 'lyrics'): void {
+    this.activeTab.set(tab);
+    this.imageError.set(false);
+  }
+
+  onImageError(): void {
+    this.imageError.set(true);
+  }
 }

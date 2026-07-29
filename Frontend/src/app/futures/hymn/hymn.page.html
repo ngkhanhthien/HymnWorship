@@ -3,8 +3,22 @@
   <section class="hymn-content-panel">
     <div class="panel-header-row">
       <div class="tab-bar">
-        <button class="tab-btn active">PDF Sheet Music</button>
-        <button class="tab-btn">Lyrics and Video</button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab() === 'pdf'"
+          (click)="selectTab('pdf')"
+        >
+          PDF Sheet Music
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab() === 'lyrics'"
+          (click)="selectTab('lyrics')"
+        >
+          Lyrics and Video
+        </button>
       </div>
       <!-- Hymn item positioned at top right of the left column -->
       <div class="top-right-hymn">
@@ -16,7 +30,24 @@
     </div>
 
     <div class="tab-body">
-      <p class="coming-soon-label">Coming Soon</p>
+      @if (activeTab() === 'pdf') {
+        <div class="sheet-music-wrapper">
+          @if (!imageError()) {
+            <img
+              [src]="sheetMusicUrl()"
+              [alt]="displayHymn().title + ' Sheet Music'"
+              class="sheet-music-img"
+              (error)="onImageError()"
+            />
+          } @else {
+            <p class="coming-soon-label">Sheet music image not available for hymn #{{ displayHymn().number }}.</p>
+          }
+        </div>
+      } @else {
+        <div class="lyrics-wrapper">
+          <p class="coming-soon-label">Lyrics & Video Coming Soon</p>
+        </div>
+      }
     </div>
   </section>
 
