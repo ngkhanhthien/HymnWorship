@@ -18,6 +18,10 @@ FIREBASE_KEY_DIR      = os.path.join(APP_DIR, "config", "key")
 STORAGE_BUCKET_NAME   = "qt-hymns.appspot.com"
 FIRESTORE_COLLECTION  = "hymns"
 
+# ─── Execution Mode ───────────────────────────────────────────────────────────
+# Options: "crawl_and_upload" (default), "crawl_only", "upload_only"
+EXECUTION_MODE        = "crawl_and_upload"
+
 # ─── Base ─────────────────────────────────────────────────────────────────────
 BASE_URL = "https://www.churchofjesuschrist.org"
 LANGUAGE = "eng"
