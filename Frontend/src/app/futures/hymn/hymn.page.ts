@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, RouterModule } from '@angular/router';
 import { map } from 'rxjs';
 import { HymnPlayerService } from '../../shared/services/hymn-player.service';
+import { ScheduleService } from '../../core/services/schedule.service';
 import { HymnItemComponent } from '../../shared/components/hymn-items/hymn-item.component';
 import { Hymn } from '../../core/models/hymn';
 import { NoteTopic, Note } from '../../core/models/note';
@@ -20,6 +21,7 @@ import { formatDateKey } from '../../core/utils/random.util';
 export class HymnPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly playerService = inject(HymnPlayerService);
+  private readonly scheduleService = inject(ScheduleService);
   private readonly noteService = inject(NoteService);
 
   /** Active Tab signal ('pdf' or 'lyrics'), default is 'pdf' */
@@ -48,19 +50,31 @@ export class HymnPageComponent {
     { initialValue: null }
   );
 
+  /** Computed fallback: first hymn in today's schedule suggestion list */
+  private readonly defaultTodayHymn = computed<Hymn>(() => {
+    const plan = this.scheduleService.currentPlan();
+    const todayStr = formatDateKey(new Date());
+    if (plan && plan.days) {
+      const todayDay = plan.days.find((d) => d.date === todayStr);
+      if (todayDay && todayDay.hymns && todayDay.hymns.length > 0) {
+        return todayDay.hymns[0];
+      }
+    }
+    // Ultimate fallback if schedule plan is not yet loaded
+    return { number: '1', title: 'The Morning Breaks' };
+  });
+
   /**
    * Priority:
    * 1. Hymn clicked from query params
    * 2. Currently playing hymn
-   * 3. Fallback default hymn (#1 The Morning Breaks)
+   * 3. First hymn in today's suggestion list (default)
    */
   readonly displayHymn = computed<Hymn>(
     (): Hymn =>
       this.queryHymn() ??
-      this.playerService.currentPlaying() ?? {
-        number: '1',
-        title: 'The Morning Breaks',
-      }
+      this.playerService.currentPlaying() ??
+      this.defaultTodayHymn()
   );
 
   /** Computed URL for sheet music PNG image */

@@ -3,9 +3,9 @@ import { Observable, tap, map, of } from 'rxjs';
 import { Hymn } from '../models/hymn';
 import { TenDayPlan, DaySchedule } from '../models/schedule';
 import { HymnDataService } from './hymn-data.service';
-import { getRandomItems, formatDateKey } from '../utils/random.util';
+import { getRandomItems, formatDateKey, getDayOfYear } from '../utils/random.util';
 
-const STORAGE_KEY = 'hymnworship_10day_plan';
+const STORAGE_KEY = 'hymnworship_10day_plan_v2';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +19,7 @@ export class ScheduleService {
   /** Selected date key ('YYYY-MM-DD'), default is Today */
   readonly selectedDate = signal<string>(formatDateKey(new Date()));
 
-  /** Reactive computed signal returning 3 hymns for the selected date */
+  /** Reactive computed signal returning hymns for the selected date (Sequential Main Hymn + 3 Suggestions) */
   readonly selectedDayHymns = computed<Hymn[]>(() => {
     const plan = this.currentPlan();
     if (!plan || !plan.days || plan.days.length === 0) {
@@ -38,12 +38,20 @@ export class ScheduleService {
   }
 
   /**
-   * Generates a fresh 10-day schedule plan (3 hymns/day for 10 days starting from Today).
-   * Persists the plan to localStorage and updates Signals.
+   * Generates a fresh 10-day schedule plan:
+   * - Each day has 1 sequential main hymn (day 1 is hymn 1, day 2 is hymn 2, etc. wrapping after 423 hymns)
+   * - Followed by 3 additional random suggestion hymns.
    */
   generate10DayPlan(): Observable<TenDayPlan> {
     return this.hymnDataService.getHymns().pipe(
       map((allHymns: Hymn[]): TenDayPlan => {
+        // Sort hymns by numeric ID (1..341, 1001..1210)
+        const sortedHymns = [...allHymns].sort((a, b) => {
+          const numA = Number(a.id || a.number || 0);
+          const numB = Number(b.id || b.number || 0);
+          return numA - numB;
+        });
+
         const today = new Date();
         const days: DaySchedule[] = [];
 
@@ -52,11 +60,21 @@ export class ScheduleService {
           nextDate.setDate(today.getDate() + i);
 
           const dateString = formatDateKey(nextDate);
-          const dailyHymns = getRandomItems<Hymn>(allHymns, 3);
+          const dayOfYear = getDayOfYear(nextDate);
+
+          // Sequential index based on day of year (0-indexed)
+          const sequentialIndex = (dayOfYear - 1) % sortedHymns.length;
+          const mainHymn = sortedHymns[sequentialIndex];
+
+          // 3 additional suggestions excluding the main hymn
+          const remainingHymns = sortedHymns.filter(
+            (h) => (h.id || h.number) !== (mainHymn.id || mainHymn.number)
+          );
+          const suggestions = getRandomItems<Hymn>(remainingHymns, 3);
 
           days.push({
             date: dateString,
-            hymns: dailyHymns,
+            hymns: [mainHymn, ...suggestions],
           });
         }
 
@@ -74,15 +92,14 @@ export class ScheduleService {
   }
 
   /**
-   * Checks if valid plan exists in localStorage. If missing or expired (> 10 days),
-   * automatically generates and saves a new 10-day plan.
+   * Checks if valid plan exists in localStorage. If missing or expired,
+   * automatically generates and saves a new sequential 10-day plan.
    */
   checkAndAutoSchedule(): Observable<TenDayPlan> {
     const existingPlan = this.loadFromStorage();
     const todayStr = formatDateKey(new Date());
 
     if (existingPlan && existingPlan.days && existingPlan.days.length >= 10) {
-      // Check if plan includes today's date
       const hasToday = existingPlan.days.some((d) => d.date === todayStr);
       if (hasToday) {
         this.currentPlan.set(existingPlan);
@@ -90,7 +107,7 @@ export class ScheduleService {
       }
     }
 
-    // Auto-generate new 10-day plan if missing or expired
+    // Auto-generate sequential 10-day plan if missing or expired
     return this.generate10DayPlan();
   }
 

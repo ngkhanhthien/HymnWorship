@@ -12,6 +12,7 @@ import { HymnPlayerService } from '../../services/hymn-player.service';
 export class HymnItemComponent {
   @Input() number = '';
   @Input() title = '';
+  @Input() isFeatured = false; // When true, highlights this hymn as the primary daily sequential hymn
 
   protected readonly playerService = inject(HymnPlayerService);
   private readonly router = inject(Router);

@@ -41,32 +41,39 @@
     </div>
   </div>
 
-  <!-- Cột Phải (Không gian âm nhạc - Cân bằng chiều cao cột trái) -->
+  <!-- Cột Phải (Không gian âm nhạc) -->
   <div class="md:col-span-7 hymn-card hymn-card-music flex flex-col justify-between h-full p-5">
     <div>
       <h2 class="text-xl font-bold text-blue-800 mb-4 uppercase">Music Space</h2>
 
-      <!-- Music Player Box -->
-      <div class="bg-blue-50 rounded-2xl min-h-[190px] border-2 border-blue-400 p-4 flex flex-col items-center justify-center mb-4 relative">
+      <!-- Music Player Box (Hiển thị bài hát mặc định theo ngày hoặc bài đang phát) -->
+      <div class="bg-blue-50 rounded-2xl min-h-[185px] border-2 border-blue-400 p-4 flex flex-col items-center justify-center mb-4 relative">
         <!-- Decorator dot/circle -->
         <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 w-6 h-6 border-2 border-blue-500 bg-white rounded-full flex items-center justify-center">
           <div class="w-3 h-3 bg-blue-500 rounded-full" [class.animate-pulse]="playerService.isAudioPlaying()"></div>
         </div>
 
-        @if (playerService.currentPlaying(); as currentHymn) {
+        @if (activePlayerHymn(); as displayHymn) {
           <div class="text-center flex flex-col items-center gap-2">
             <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-              {{ playerService.isAudioPlaying() ? 'Now Playing' : 'Paused' }}
+              @if (playerService.isAudioPlaying() && playerService.currentPlayingId() === displayHymn.number) {
+                Now Playing
+              } @else if (playerService.currentPlayingId() === displayHymn.number) {
+                Paused
+              } @else {
+                Today's Daily Hymn
+              }
             </span>
             <h2 class="text-xl font-bold text-gray-800 max-w-md">
-              {{ currentHymn.number }}. {{ currentHymn.title }}
+              {{ displayHymn.number }}. {{ displayHymn.title }}
             </h2>
             <button
               type="button"
               class="mt-1 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition"
-              (click)="playerService.toggle(currentHymn)"
+              (click)="playerService.toggle(displayHymn)"
+              [attr.aria-label]="playerService.isAudioPlaying() && playerService.currentPlayingId() === displayHymn.number ? 'Pause' : 'Play'"
             >
-              @if (playerService.isAudioPlaying()) {
+              @if (playerService.isAudioPlaying() && playerService.currentPlayingId() === displayHymn.number) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <rect x="6" y="4" width="4" height="16" rx="1"/>
                   <rect x="14" y="4" width="4" height="16" rx="1"/>
@@ -86,12 +93,16 @@
         }
       </div>
 
-      <!-- Suggestions List -->
+      <!-- Suggestions List (Bài mặc định xếp đầu tiên + 3 bài gợi ý) -->
       <div>
         <h3 class="font-bold text-base mb-2 text-black">Hymn suggestions:</h3>
-        <div class="flex flex-col gap-1">
-          @for (hymn of scheduledHymns(); track hymn.number) {
-            <app-hymn-item [number]="hymn.number" [title]="hymn.title" />
+        <div class="flex flex-col gap-2">
+          @for (hymn of scheduledHymns(); track hymn.number; let idx = $index) {
+            <app-hymn-item
+              [number]="hymn.number"
+              [title]="hymn.title"
+              [isFeatured]="idx === 0"
+            />
           } @empty {
             <p class="text-sm text-gray-400 italic py-2">No hymns scheduled for this date.</p>
           }

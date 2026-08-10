@@ -1,4 +1,8 @@
-<div class="hymn-item-wrapper" [class.active-playing]="isCurrentHymn()">
+<div
+  class="hymn-item-wrapper"
+  [class.active-playing]="isCurrentHymn()"
+  [class.featured-hymn]="isFeatured"
+>
   <div class="hymn-item">
     <button
       class="play-btn"
@@ -22,7 +26,12 @@
         </svg>
       }
     </button>
-    <span class="hymn-label" (click)="navigateToHymn()">{{ number }}. {{ title }}</span>
+    <div class="hymn-info-group" (click)="navigateToHymn()">
+      <span class="hymn-label">{{ number }}. {{ title }}</span>
+      @if (isFeatured) {
+        <span class="featured-tag">Daily Hymn</span>
+      }
+    </div>
   </div>
 
   <!-- Music Progress Bar (Only visible when this hymn is played) -->

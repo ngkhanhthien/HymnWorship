@@ -6,6 +6,7 @@ import { CalendarComponent } from '../../shared/components/calendar/calendar';
 import { ScheduleService } from '../../core/services/schedule.service';
 import { HymnPlayerService } from '../../shared/services/hymn-player.service';
 import { NoteService, NoteTableItem } from '../../core/services/note.service';
+import { Hymn } from '../../core/models/hymn';
 
 @Component({
   selector: 'app-home',
@@ -18,8 +19,18 @@ export class HomePageComponent {
   private readonly noteService = inject(NoteService);
   protected readonly playerService = inject(HymnPlayerService);
 
-  /** Reactive signal returning 3 hymns for the selected date on calendar */
+  /** Reactive signal returning sequential main hymn + 3 suggestions for the selected date on calendar */
   readonly scheduledHymns = this.scheduleService.selectedDayHymns;
+
+  /**
+   * Active hymn displayed in the top Music Player Box:
+   * Priority:
+   * 1. Currently playing hymn
+   * 2. First hymn in the scheduled hymns list (Sequential Daily Hymn)
+   */
+  readonly activePlayerHymn = computed<Hymn | null>(() => {
+    return this.playerService.currentPlaying() ?? (this.scheduledHymns()[0] ?? null);
+  });
 
   /**
    * Brief notes for Home page display:

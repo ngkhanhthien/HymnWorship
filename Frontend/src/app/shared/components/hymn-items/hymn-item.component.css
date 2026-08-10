@@ -15,17 +15,29 @@
   transition: all 0.2s ease;
 }
 
+/* Featured / Daily Sequential Hymn styling (bolder mark) */
+.hymn-item-wrapper.featured-hymn {
+  border: 2px solid #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.1);
+}
+
+.hymn-item-wrapper.featured-hymn .hymn-label {
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
 .hymn-item-wrapper.active-playing {
   border-color: #2563eb;
-  background: #eff6ff;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+  background: #dbeafe;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18);
 }
 
 .hymn-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 18px;
+  gap: 14px;
+  padding: 10px 16px;
   cursor: pointer;
   width: 100%;
   box-sizing: border-box;
@@ -40,7 +52,7 @@
   border: none;
   cursor: pointer;
   flex-shrink: 0;
-  padding: 6px;
+  padding: 4px;
   line-height: 0;
   color: #2563eb;
   border-radius: 50%;
@@ -51,7 +63,7 @@
 }
 
 .play-btn:hover {
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(37, 99, 235, 0.12);
   transform: scale(1.08);
 }
 
@@ -60,17 +72,24 @@
 }
 
 .icon {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   display: block;
+}
+
+.hymn-info-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
 }
 
 .hymn-label {
   color: #1f2937;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -81,12 +100,24 @@
   text-decoration: underline;
 }
 
+.featured-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
 /* ── Music Progress Bar ── */
 .music-progress-container {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 18px 12px 18px;
+  padding: 2px 16px 10px 16px;
   animation: fadeIn 0.25s ease-in-out;
 }
 

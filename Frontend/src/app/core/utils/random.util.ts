@@ -26,3 +26,17 @@ export function formatDateKey(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+/**
+ * Returns the day of the year (1-366) for a given Date.
+ * E.g., Jan 1 -> 1, Jan 2 -> 2, etc.
+ */
+export function getDayOfYear(date: Date): number {
+  const startOfYear = new Date(date.getFullYear(), 0, 0);
+  const diff =
+    date.getTime() -
+    startOfYear.getTime() +
+    (startOfYear.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000;
+  const oneDay = 1000 * 60 * 60 * 24;
+  return Math.floor(diff / oneDay);
+}
