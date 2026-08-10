@@ -6,7 +6,7 @@
       <app-calendar />
     </div>
 
-    <!-- Section: Nhật Ký & Ghi Chú (Khung ôm trọn nút View All Notes) -->
+    <!-- Section: Nhật Ký & Ghi Chú (Hiển thị theo ngày và ưu tiên bài mặc định) -->
     <div class="hymn-card hymn-card-utility flex-1 flex flex-col justify-between p-5 min-h-0">
       <div class="flex-1 flex flex-col min-h-0">
         <div class="flex items-center justify-between mb-3 flex-shrink-0">
@@ -16,9 +16,22 @@
 
         <ul class="space-y-2.5 text-gray-600 text-sm overflow-y-auto flex-1 min-h-[140px] pr-1">
           @for (note of homeBriefNotes(); track note.id) {
-            <li class="flex flex-col gap-1 bg-pink-50/60 p-2.5 rounded-lg border border-pink-100 transition hover:bg-pink-100/50">
+            <li
+              class="flex flex-col gap-1 p-2.5 rounded-lg border transition"
+              [ngClass]="{
+                'bg-pink-100/70 border-pink-300 shadow-xs ring-1 ring-pink-200': note.isDefaultHymnNote,
+                'bg-pink-50/50 border-pink-100 hover:bg-pink-100/50': !note.isDefaultHymnNote
+              }"
+            >
               <div class="flex items-center justify-between text-xs">
-                <span class="font-bold text-pink-900">#{{ note.hymnNumber }} &bull; [{{ note.topic }}]</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-pink-900">#{{ note.hymnNumber }} &bull; [{{ note.topic }}]</span>
+                  @if (note.isDefaultHymnNote) {
+                    <span class="text-[10px] uppercase font-bold tracking-wide px-1.5 py-0.2 rounded bg-pink-700 text-white shadow-xs">
+                      Daily Hymn
+                    </span>
+                  }
+                </div>
                 <span class="text-gray-400 font-medium">{{ note.date }}</span>
               </div>
               <span class="text-gray-700 font-medium line-clamp-2">{{ note.content }}</span>
@@ -26,7 +39,7 @@
           } @empty {
             <li class="flex items-center gap-2 text-gray-400 italic py-2">
               <span>&bull;</span>
-              <span>No notes created yet. Add your first note on any Hymn page!</span>
+              <span>No notes recorded for this date yet. Add a note on any Hymn page!</span>
             </li>
           }
         </ul>
@@ -46,7 +59,7 @@
     <div>
       <h2 class="text-xl font-bold text-blue-800 mb-4 uppercase">Music Space</h2>
 
-      <!-- Music Player Box (Hiển thị bài hát mặc định theo ngày hoặc bài đang phát) -->
+      <!-- Music Player Box -->
       <div class="bg-blue-50 rounded-2xl min-h-[185px] border-2 border-blue-400 p-4 flex flex-col items-center justify-center mb-4 relative">
         <!-- Decorator dot/circle -->
         <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 w-6 h-6 border-2 border-blue-500 bg-white rounded-full flex items-center justify-center">

@@ -8,6 +8,10 @@ import { HymnPlayerService } from '../../shared/services/hymn-player.service';
 import { NoteService, NoteTableItem } from '../../core/services/note.service';
 import { Hymn } from '../../core/models/hymn';
 
+export interface HomeNoteDisplayItem extends NoteTableItem {
+  isDefaultHymnNote: boolean;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -33,23 +37,29 @@ export class HomePageComponent {
   });
 
   /**
-   * Brief notes for Home page display:
-   * Priorities notes matching the currently playing hymn, fallback to latest notes overall
+   * Notes for the selected calendar date:
+   * 1. Notes for the Default Daily Hymn (scheduledHymns[0]) come first and are highlighted.
+   * 2. Followed by notes for other hymns recorded on the same date.
    */
-  readonly homeBriefNotes = computed<NoteTableItem[]>(() => {
-    const currentPlaying = this.playerService.currentPlaying();
+  readonly homeBriefNotes = computed<HomeNoteDisplayItem[]>(() => {
+    const selectedDate = this.scheduleService.selectedDate();
+    const scheduled = this.scheduledHymns();
+    const defaultHymnNum = scheduled.length > 0 ? String(scheduled[0].number) : null;
     const allNotes = this.noteService.allNotesItems();
 
-    if (currentPlaying) {
-      const playingHymnNotes = allNotes.filter(
-        (n) => String(n.hymnNumber) === String(currentPlaying.number)
-      );
-      if (playingHymnNotes.length > 0) {
-        return playingHymnNotes.slice(0, 4);
-      }
-    }
+    // Filter all notes created for the selected date
+    const dayNotes = allNotes.filter((n) => n.date === selectedDate);
 
-    // Fallback: take latest 4 notes overall
-    return allNotes.slice(0, 4);
+    // 1. Notes for default daily hymn (prioritized & marked)
+    const defaultHymnNotes: HomeNoteDisplayItem[] = dayNotes
+      .filter((n) => defaultHymnNum && String(n.hymnNumber) === defaultHymnNum)
+      .map((n) => ({ ...n, isDefaultHymnNote: true }));
+
+    // 2. Notes for other hymns on the same date
+    const otherHymnNotes: HomeNoteDisplayItem[] = dayNotes
+      .filter((n) => !defaultHymnNum || String(n.hymnNumber) !== defaultHymnNum)
+      .map((n) => ({ ...n, isDefaultHymnNote: false }));
+
+    return [...defaultHymnNotes, ...otherHymnNotes];
   });
 }
