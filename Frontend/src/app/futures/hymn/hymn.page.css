@@ -114,28 +114,156 @@
   margin: 0;
 }
 
-/* ── Right Panel (Full Screen Height & Sticky Notes Panel) ── */
+/* ── Right Panel (Devotional & Notes Panel) ── */
 .hymn-notes-panel {
   border: 2px solid #c0392b;
   border-radius: 8px;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   background: #fafafa;
   position: sticky;
   top: 20px;
   height: calc(100vh - 110px);
   align-self: flex-start;
   box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.notes-title {
-  font-size: 15px;
+/* ── Section Header Common ── */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.section-title {
+  font-size: 13px;
   font-weight: 700;
-  color: #c0392b;
+  color: #1a3a5c;
   margin: 0;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ── Scriptures Section ── */
+.scriptures-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scriptures-count-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+.scriptures-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.scripture-link-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #dbeafe;
+  border-radius: 6px;
+  padding: 8px 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+}
+
+.scripture-link-card:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.12);
+}
+
+.scripture-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.scripture-book-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.scripture-ref-text {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e3a8a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scripture-external-icon {
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 6px;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.scripture-link-card:hover .scripture-external-icon {
+  color: #2563eb;
+  transform: translate(1px, -1px);
+}
+
+.empty-scriptures-msg {
+  font-size: 12px;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 0;
+  padding: 4px 0;
+}
+
+/* ── Divider ── */
+.sidebar-divider {
+  height: 1px;
+  background: linear-gradient(to right, rgba(226, 232, 240, 0.2), #cbd5e1, rgba(226, 232, 240, 0.2));
+  margin: 2px 0;
+}
+
+/* ── Notes Section ── */
+.notes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+
+.notes-section .section-title {
+  color: #c0392b;
 }
 
 .note-input-container {
@@ -183,8 +311,8 @@
   border: none;
   outline: none;
   flex: 1;
-  font-size: 14px;
-  color: #555;
+  font-size: 13px;
+  color: #333;
 }
 
 .notes-history {
@@ -193,12 +321,14 @@
   gap: 6px;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
+  padding-right: 2px;
 }
 
 .notes-history-label {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #333;
+  color: #475569;
   margin: 0;
 }
 
@@ -208,7 +338,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .note-item {
@@ -216,11 +346,12 @@
   justify-content: space-between;
   align-items: center;
   background: #fff;
+  border: 1px solid #e2e8f0;
   border-radius: 4px;
-  padding: 10px 12px;
-  font-size: 13px;
+  padding: 8px 10px;
+  font-size: 12.5px;
   color: #333;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 .note-content-group {
@@ -232,7 +363,7 @@
 }
 
 .topic-tag {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
@@ -263,35 +394,47 @@
 }
 
 .empty-notes-msg {
-  font-size: 13px;
-  color: #888;
+  font-size: 12px;
+  color: #94a3b8;
   font-style: italic;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 
 .note-delete {
   background: none;
   border: none;
-  color: #e74c3c;
+  color: #94a3b8;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
   flex-shrink: 0;
+  transition: color 0.2s;
+  padding: 2px 4px;
+}
+
+.note-delete:hover {
+  color: #ef4444;
 }
 
 .notes-view-all-btn {
   margin-top: auto;
-  padding: 12px;
+  padding: 10px;
   background: #c0392b;
   color: #fff;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   text-align: center;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
   flex-shrink: 0;
 }
 
-.notes-view-all-btn:hover { background: #a93226; }
+.notes-view-all-btn:hover {
+  background: #a93226;
+}
+
+.notes-view-all-btn:active {
+  transform: translateY(1px);
+}

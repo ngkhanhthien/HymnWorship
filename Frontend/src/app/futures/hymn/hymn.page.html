@@ -51,53 +51,101 @@
     </div>
   </section>
 
-  <!-- Right: Notes Panel -->
+  <!-- Right: Devotional & Notes Panel -->
   <aside class="hymn-notes-panel">
-    <h3 class="notes-title">YOUR NOTES</h3>
-
-    <div class="note-input-container">
-      <div class="note-topic-select-wrapper">
-        <label for="noteTopicSelect" class="topic-label">Topic:</label>
-        <select
-          id="noteTopicSelect"
-          class="topic-select"
-          [ngModel]="selectedTopic()"
-          (ngModelChange)="selectedTopic.set($event)"
-        >
-          @for (t of topics; track t) {
-            <option [value]="t">{{ t }}</option>
-          }
-        </select>
+    <!-- Scriptures Section -->
+    <div class="scriptures-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <span class="section-icon">📖</span>
+          RELATED SCRIPTURES
+        </h3>
+        @if (currentScriptures().length > 0) {
+          <span class="scriptures-count-badge">{{ currentScriptures().length }}</span>
+        }
       </div>
 
-      <div class="note-input-wrapper">
-        <span class="note-icon">✏️</span>
-        <input
-          class="note-input"
-          type="text"
-          placeholder="Add a new note and press Enter..."
-          [ngModel]="noteContent()"
-          (ngModelChange)="noteContent.set($event)"
-          (keyup.enter)="onAddNote()"
-        />
+      <div class="scriptures-list">
+        @for (scripture of currentScriptures(); track scripture.reference) {
+          <a
+            class="scripture-link-card"
+            [href]="scripture.url || 'javascript:void(0)'"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open {{ scripture.reference }}"
+          >
+            <div class="scripture-info">
+              <span class="scripture-book-icon">📜</span>
+              <span class="scripture-ref-text">{{ scripture.reference }}</span>
+            </div>
+            <span class="scripture-external-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                <path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h4a.75.75 0 0 1 0 1.5h-4Z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M6.194 12.753a.75.75 0 0 0 1.06.053L16.5 4.44v2.81a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.553l-9.156 8.194a.75.75 0 0 0-.053 1.06Z" clip-rule="evenodd" />
+              </svg>
+            </span>
+          </a>
+        } @empty {
+          <p class="empty-scriptures-msg">No scriptures linked for this hymn.</p>
+        }
       </div>
     </div>
 
-    <div class="notes-history">
-      <p class="notes-history-label">Note history:</p>
-      <ul class="notes-list">
-        @for (note of currentNotes(); track note.id) {
-          <li class="note-item">
-            <div class="note-content-group">
-              <span class="topic-tag" [attr.data-topic]="note.topic">[{{ note.topic }}]</span>
-              <span class="note-text">{{ note.content }}</span>
-            </div>
-            <button class="note-delete" (click)="onDeleteNote(note.id)">✖</button>
-          </li>
-        } @empty {
-          <li class="empty-notes-msg">No notes added for this song today yet.</li>
-        }
-      </ul>
+    <div class="sidebar-divider"></div>
+
+    <!-- Notes Section -->
+    <div class="notes-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <span class="section-icon">📝</span>
+          YOUR NOTES
+        </h3>
+      </div>
+
+      <div class="note-input-container">
+        <div class="note-topic-select-wrapper">
+          <label for="noteTopicSelect" class="topic-label">Topic:</label>
+          <select
+            id="noteTopicSelect"
+            class="topic-select"
+            [ngModel]="selectedTopic()"
+            (ngModelChange)="selectedTopic.set($event)"
+          >
+            @for (t of topics; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="note-input-wrapper">
+          <span class="note-icon">✏️</span>
+          <input
+            class="note-input"
+            type="text"
+            placeholder="Add a new note and press Enter..."
+            [ngModel]="noteContent()"
+            (ngModelChange)="noteContent.set($event)"
+            (keyup.enter)="onAddNote()"
+          />
+        </div>
+      </div>
+
+      <div class="notes-history">
+        <p class="notes-history-label">Note history:</p>
+        <ul class="notes-list">
+          @for (note of currentNotes(); track note.id) {
+            <li class="note-item">
+              <div class="note-content-group">
+                <span class="topic-tag" [attr.data-topic]="note.topic">[{{ note.topic }}]</span>
+                <span class="note-text">{{ note.content }}</span>
+              </div>
+              <button class="note-delete" (click)="onDeleteNote(note.id)">✖</button>
+            </li>
+          } @empty {
+            <li class="empty-notes-msg">No notes added for this song today yet.</li>
+          }
+        </ul>
+      </div>
     </div>
 
     <button class="notes-view-all-btn" routerLink="/notes">📋 VIEW ALL NOTES →</button>

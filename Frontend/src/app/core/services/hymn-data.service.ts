@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, map, catchError } from 'rxjs';
+import { Observable, of, map, catchError, shareReplay } from 'rxjs';
 import { Hymn } from '../models/hymn';
 import { SettingsService } from './settings.service';
 
@@ -10,6 +10,7 @@ import { SettingsService } from './settings.service';
 export class HymnDataService {
   private readonly http = inject(HttpClient);
   private readonly settingsService = inject(SettingsService);
+  private cachedHymns$: Observable<Hymn[]> | null = null;
 
   /**
    * Unified data fetcher respecting SettingsService.dataSource() mode.
@@ -19,7 +20,10 @@ export class HymnDataService {
     const mode = this.settingsService.dataSource();
 
     if (mode === 'local') {
-      return this.fetchLocalHymns();
+      if (!this.cachedHymns$) {
+        this.cachedHymns$ = this.fetchLocalHymns().pipe(shareReplay(1));
+      }
+      return this.cachedHymns$;
     }
 
     // Firebase mode placeholder (returns empty array until Firebase SDK is connected)

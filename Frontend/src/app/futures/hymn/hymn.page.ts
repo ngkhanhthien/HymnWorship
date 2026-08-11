@@ -3,10 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, RouterModule } from '@angular/router';
 import { map } from 'rxjs';
+import { HymnDataService } from '../../core/services/hymn-data.service';
 import { HymnPlayerService } from '../../shared/services/hymn-player.service';
 import { ScheduleService } from '../../core/services/schedule.service';
 import { HymnItemComponent } from '../../shared/components/hymn-items/hymn-item.component';
-import { Hymn } from '../../core/models/hymn';
+import { Hymn, ScriptureRef } from '../../core/models/hymn';
 import { NoteTopic, Note } from '../../core/models/note';
 import { NoteService } from '../../core/services/note.service';
 import { formatDateKey } from '../../core/utils/random.util';
@@ -23,6 +24,10 @@ export class HymnPageComponent {
   private readonly playerService = inject(HymnPlayerService);
   private readonly scheduleService = inject(ScheduleService);
   private readonly noteService = inject(NoteService);
+  private readonly hymnDataService = inject(HymnDataService);
+
+  /** All hymns signal for looking up rich metadata (scriptures, audio, sheet music) */
+  readonly allHymns = toSignal(this.hymnDataService.getHymns());
 
   /** Active Tab signal ('pdf' or 'lyrics'), default is 'pdf' */
   readonly activeTab = signal<'pdf' | 'lyrics'>('pdf');
@@ -70,12 +75,24 @@ export class HymnPageComponent {
    * 2. Currently playing hymn
    * 3. First hymn in today's suggestion list (default)
    */
-  readonly displayHymn = computed<Hymn>(
-    (): Hymn =>
+  readonly displayHymn = computed<Hymn>((): Hymn => {
+    const rawHymn =
       this.queryHymn() ??
       this.playerService.currentPlaying() ??
-      this.defaultTodayHymn()
-  );
+      this.defaultTodayHymn();
+
+    const hymnsList = (this.allHymns() ?? []) as Hymn[];
+    const fullHymn = hymnsList.find(
+      (h: Hymn) => String(h.number) === String(rawHymn.number)
+    );
+
+    return fullHymn ? { ...rawHymn, ...fullHymn } : rawHymn;
+  });
+
+  /** Computed list of scriptures related to the current hymn */
+  readonly currentScriptures = computed<ScriptureRef[]>(() => {
+    return this.displayHymn().scriptures ?? [];
+  });
 
   /** Computed URL for sheet music PNG image */
   readonly sheetMusicUrl = computed<string>(
