@@ -50,6 +50,12 @@ def get_firebase_clients() -> Tuple[Optional[Any], Optional[Any]]:
     return db, bucket
 
 
+def make_storage_url(bucket_name: str, storage_path: str) -> str:
+    """Generate public Firebase Storage HTTPS download URL."""
+    encoded_path = urllib.parse.quote(storage_path, safe="")
+    return f"https://firebasestorage.googleapis.com/v0/b/{bucket_name}/o/{encoded_path}?alt=media"
+
+
 def upload_media_file(
     bucket: Any,
     local_path: Optional[str],
@@ -66,8 +72,7 @@ def upload_media_file(
 
     try:
         blob = bucket.blob(storage_path)
-        encoded_path = urllib.parse.quote(storage_path, safe="")
-        public_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{encoded_path}?alt=media"
+        public_url = make_storage_url(bucket.name, storage_path)
 
         if not force_upload and blob.exists():
             return public_url
@@ -79,37 +84,73 @@ def upload_media_file(
         return None
 
 
-def build_hymn_document(hymn: Dict[str, Any], bucket: Any) -> Dict[str, Any]:
-    """Upload hymn media to Storage and prepare Firestore document payload."""
+def build_hymn_document(
+    hymn: Dict[str, Any],
+    bucket: Any,
+    existing_storage_paths: set,
+) -> Dict[str, Any]:
+    """
+    Upload new local media to Storage and auto-discover any media already on Storage.
+    Prepares Firestore document payload with accurate media links.
+    """
     hymn_id = str(hymn.get("id", ""))
     collection_code = hymn.get("collection", "hymns")
     collection_name = hymn.get("collection_name", "Hymns")
 
-    # 1. Upload sheet music images (flat folder: sheet_music/{filename})
+    # 1. Sheet music images
     sheet_music_paths = hymn.get("sheet_music", []) or []
-    sheet_music_urls = []
+    sheet_music_urls: List[str] = []
+
+    # Upload local files if present
     for local_sheet in sheet_music_paths:
         sheet_filename = os.path.basename(local_sheet)
         storage_dest = f"sheet_music/{sheet_filename}"
         url = upload_media_file(bucket, local_sheet, storage_dest, "image/png")
-        if url:
+        if url and url not in sheet_music_urls:
+            sheet_music_urls.append(url)
+            existing_storage_paths.add(storage_dest)
+
+    # Auto-discover from Storage (e.g. manually uploaded sheet music)
+    single_sheet_dest = f"sheet_music/{hymn_id}.png"
+    if single_sheet_dest in existing_storage_paths:
+        url = make_storage_url(bucket.name, single_sheet_dest)
+        if url not in sheet_music_urls:
             sheet_music_urls.append(url)
 
-    # 2. Upload accompaniment audio (flat folder: audio/accompaniment/{filename})
+    for p in range(1, 10):
+        multi_sheet_dest = f"sheet_music/{hymn_id}_{p}.png"
+        if multi_sheet_dest in existing_storage_paths:
+            url = make_storage_url(bucket.name, multi_sheet_dest)
+            if url not in sheet_music_urls:
+                sheet_music_urls.append(url)
+
+    # 2. Accompaniment audio
     acc_path = hymn.get("audio_accompaniment")
-    acc_url = None
-    if acc_path:
+    acc_url: Optional[str] = None
+    if acc_path and os.path.exists(acc_path):
         acc_filename = os.path.basename(acc_path)
         acc_storage_dest = f"audio/accompaniment/{acc_filename}"
         acc_url = upload_media_file(bucket, acc_path, acc_storage_dest, "audio/mpeg")
+        if acc_url:
+            existing_storage_paths.add(acc_storage_dest)
+    else:
+        acc_dest = f"audio/accompaniment/{hymn_id}.mp3"
+        if acc_dest in existing_storage_paths:
+            acc_url = make_storage_url(bucket.name, acc_dest)
 
-    # 3. Upload vocal audio (flat folder: audio/vocal/{filename})
+    # 3. Vocal audio
     vocal_path = hymn.get("audio_vocal")
-    vocal_url = None
-    if vocal_path:
+    vocal_url: Optional[str] = None
+    if vocal_path and os.path.exists(vocal_path):
         vocal_filename = os.path.basename(vocal_path)
         vocal_storage_dest = f"audio/vocal/{vocal_filename}"
         vocal_url = upload_media_file(bucket, vocal_path, vocal_storage_dest, "audio/mpeg")
+        if vocal_url:
+            existing_storage_paths.add(vocal_storage_dest)
+    else:
+        vocal_dest = f"audio/vocal/{hymn_id}.mp3"
+        if vocal_dest in existing_storage_paths:
+            vocal_url = make_storage_url(bucket.name, vocal_dest)
 
     try:
         numeric_id = int(hymn_id)
@@ -137,8 +178,10 @@ def build_hymn_document(hymn: Dict[str, Any], bucket: Any) -> Dict[str, Any]:
 
 def sync_hymns_to_firebase(hymns: List[Dict[str, Any]]) -> bool:
     """
-    Sync crawled hymns, sheet music, accompaniment and vocal audio to Firebase.
-    Respects HYMN_DETAIL_CRAWL_LIMIT to upload only detailed hymns per collection.
+    Sync all hymns to Firebase:
+    - Auto-discovers any media previously or manually uploaded to Firebase Storage.
+    - Syncs full hymn catalogue to Cloud Firestore.
+    - Updates local and Cloud Storage data/hymns.json with accurate media links.
     """
     if not hymns:
         logger.warning("No hymns provided for Firebase synchronization.")
@@ -149,23 +192,17 @@ def sync_hymns_to_firebase(hymns: List[Dict[str, Any]]) -> bool:
         logger.error("Firebase clients unavailable — skipping upload.")
         return False
 
-    # Filter hymns per collection according to HYMN_DETAIL_CRAWL_LIMIT
-    target_hymns = []
-    if isinstance(HYMN_DETAIL_CRAWL_LIMIT, int) and HYMN_DETAIL_CRAWL_LIMIT > 0:
-        counts: Dict[str, int] = {}
-        for h in hymns:
-            col = h.get("collection", "hymns")
-            counts[col] = counts.get(col, 0) + 1
-            if counts[col] <= HYMN_DETAIL_CRAWL_LIMIT:
-                target_hymns.append(h)
-    else:
-        target_hymns = hymns
+    # Scan Storage bucket once to auto-discover all existing media
+    logger.info("Scanning existing media files on Firebase Cloud Storage...")
+    try:
+        existing_storage_paths = {b.name for b in bucket.list_blobs()}
+        logger.info(f"Found {len(existing_storage_paths)} existing media items in Storage.")
+    except Exception as e:
+        logger.warning(f"Could not list bucket blobs: {e}")
+        existing_storage_paths = set()
 
     logger.info("=======================================================")
-    logger.info(
-        f"  Starting Firebase Sync: {len(target_hymns)} Hymns "
-        f"(Limit: {HYMN_DETAIL_CRAWL_LIMIT}/collection) -> [{FIREBASE_PROJECT_ID}]"
-    )
+    logger.info(f"  Starting Firebase Sync: {len(hymns)} Hymns -> [{FIREBASE_PROJECT_ID}]")
     logger.info("=======================================================")
 
     batch = db.batch()
@@ -173,31 +210,30 @@ def sync_hymns_to_firebase(hymns: List[Dict[str, Any]]) -> bool:
     total_synced = 0
     synced_hymns_json = []
 
-    for i, hymn in enumerate(target_hymns, 1):
+    for i, hymn in enumerate(hymns, 1):
         hymn_id = str(hymn.get("id", ""))
         collection_code = hymn.get("collection", "hymns")
         doc_id = f"{collection_code}_{hymn_id}"
 
-        doc_payload = build_hymn_document(hymn, bucket)
+        doc_payload = build_hymn_document(hymn, bucket, existing_storage_paths)
         doc_ref = db.collection(FIRESTORE_COLLECTION).document(doc_id)
         batch.set(doc_ref, doc_payload, merge=True)
         batch_count += 1
         total_synced += 1
 
-        # Prepare JSON-serializable item
         json_item = dict(doc_payload)
         json_item["updated_at"] = datetime.now().isoformat()
         synced_hymns_json.append(json_item)
 
-        acc_status = "[OK]" if doc_payload['audio_accompaniment_url'] else "[-]"
-        voc_status = "[OK]" if doc_payload['audio_vocal_url'] else "[-]"
-        logger.info(
-            f"  [{i}/{len(target_hymns)}] Uploaded #{hymn_id} '{hymn.get('title')}' "
-            f"(Sheets: {len(doc_payload['sheet_music_urls'])}, "
-            f"Acc: {acc_status}, Vocal: {voc_status})"
-        )
+        has_media = bool(doc_payload['sheet_music_urls'] or doc_payload['audio_accompaniment_url'] or doc_payload['audio_vocal_url'])
+        if has_media:
+            acc_status = "[OK]" if doc_payload['audio_accompaniment_url'] else "[-]"
+            voc_status = "[OK]" if doc_payload['audio_vocal_url'] else "[-]"
+            logger.info(
+                f"  [{i}/{len(hymns)}] #{hymn_id:>4} '{hymn.get('title')}' "
+                f"(Sheets: {len(doc_payload['sheet_music_urls'])}, Acc: {acc_status}, Vocal: {voc_status})"
+            )
 
-        # Commit batch every 400 operations (Firestore limit is 500)
         if batch_count >= 400:
             batch.commit()
             batch = db.batch()
@@ -211,7 +247,7 @@ def sync_hymns_to_firebase(hymns: List[Dict[str, Any]]) -> bool:
     local_json_path = os.path.join(OUTPUT_DIR, "hymns.json")
     with open(local_json_path, "w", encoding="utf-8") as f:
         json.dump(synced_hymns_json, f, ensure_ascii=False, indent=2)
-    logger.info(f"Updated local JSON with Firebase URLs -> {local_json_path}")
+    logger.info(f"Updated local JSON ({len(synced_hymns_json)} hymns) with Firebase URLs -> {local_json_path}")
 
     # Upload JSON file to Cloud Storage (data/hymns.json)
     json_storage_path = "data/hymns.json"
@@ -219,7 +255,7 @@ def sync_hymns_to_firebase(hymns: List[Dict[str, Any]]) -> bool:
         bucket, local_json_path, json_storage_path, "application/json", force_upload=True
     )
     if json_storage_url:
-        logger.info(f"Uploaded hymns.json to Cloud Storage: {json_storage_url}")
+        logger.info(f"Uploaded updated hymns.json to Cloud Storage: {json_storage_url}")
 
     logger.info("=======================================================")
     logger.info(f"  Firebase Sync Completed: {total_synced} Hymns Synced Successfully!")
