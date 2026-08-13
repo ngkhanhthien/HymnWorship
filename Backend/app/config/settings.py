@@ -59,7 +59,7 @@ REQUEST_HEADERS = {
 REQUEST_TIMEOUT = 15
 JS_RENDER_WAIT  = 10   # seconds to wait for React to render
 JS_SCROLL_PAUSE = 1    # seconds between scroll steps
-JS_DETAIL_WAIT  = 5    # max seconds to wait for hymn detail h1 to appear (stops early if faster)
+JS_DETAIL_WAIT  = 10   # max seconds to wait for hymn detail h1 to appear (stops early if faster)
 
 # ─── Output & Crawl Limits ───────────────────────────────────────────────────
 OUTPUT_DIR              = "app/output"
@@ -69,7 +69,7 @@ AUDIO_ACCOMPANIMENT_DIR = "app/output/audio/accompaniment"
 AUDIO_VOCAL_DIR         = "app/output/audio/vocal"
 
 # Number of hymns to crawl detail pages for testing (e.g. 5) or "all" to crawl all hymns
-HYMN_DETAIL_CRAWL_LIMIT = 5
+HYMN_DETAIL_CRAWL_LIMIT = 10
 
 # Force re-download/refresh sh
 # eet music images even if they already exist locally.

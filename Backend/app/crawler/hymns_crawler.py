@@ -282,9 +282,8 @@ def _download_audio_file(audio_url: str, target_dir: str, hymn_id: str, label: s
 
 def _extract_audio_urls_from_page(driver: webdriver.Chrome) -> Tuple[Optional[str], Optional[str]]:
     """
-    Extract Accompaniment and Vocal (Choir) MP3 URLs from the hymn detail page.
-    Checks structured window.renderData first, with regex fallback.
-    Returns (accompaniment_url, vocal_url).
+    Extract Accompaniment and Vocal MP3 audio URLs from detail page.
+    Combines window.renderData analysis, DOM audio element querying, and regex search.
     """
     acc_url: Optional[str] = None
     vocal_url: Optional[str] = None
@@ -298,17 +297,31 @@ def _extract_audio_urls_from_page(driver: webdriver.Chrome) -> Tuple[Optional[st
         if assets and isinstance(assets, list):
             for a in assets:
                 atype = str(a.get("assetType") or "").upper()
-                durl = a.get("distributionUrl")
+                durl = a.get("distributionUrl") or a.get("url")
                 if not durl:
                     continue
-                if atype == "AUDIO_ACCOMPANIMENT" and not acc_url:
+                if atype in ["AUDIO_ACCOMPANIMENT", "AUDIO_ACCOMPANIMENT_GUITAR"] and not acc_url:
                     acc_url = durl
-                elif atype in ["AUDIO_VOCAL_CONGREGATION", "AUDIO_VOCAL", "AUDIO_VOCAL_SOLO"] and not vocal_url:
+                elif atype in ["AUDIO_VOCAL", "AUDIO_VOCAL_CONGREGATION", "AUDIO_VOCAL_SOLO", "AUDIO_VOCAL_CHOIR"] and not vocal_url:
                     vocal_url = durl
     except Exception:
         pass
 
-    # Method 2: Regex search across page source if needed
+    # Method 2: DOM <audio> and <source> elements
+    if not acc_url or not vocal_url:
+        try:
+            audio_elems = driver.find_elements(By.CSS_SELECTOR, "audio, audio source")
+            for el in audio_elems:
+                src = el.get_attribute("src") or ""
+                if src and ".mp3" in src.lower():
+                    if "vocal" in src.lower() and not vocal_url:
+                        vocal_url = src
+                    elif "accompaniment" in src.lower() and not acc_url:
+                        acc_url = src
+        except Exception:
+            pass
+
+    # Method 3: Regex search across page source as fallback
     if not acc_url or not vocal_url:
         try:
             mp3_links = set(re.findall(r'https?://[^\'"\s<>]+\.mp3[^\'"\s<>]*', driver.page_source))
@@ -317,6 +330,8 @@ def _extract_audio_urls_from_page(driver: webdriver.Chrome) -> Tuple[Optional[st
                     acc_matches = [l for l in mp3_links if "accompaniment" in l.lower() and "vocal" not in l.lower()]
                     if acc_matches:
                         acc_url = acc_matches[0]
+                    elif len(mp3_links) == 1:
+                        acc_url = list(mp3_links)[0]
                 if not vocal_url:
                     vocal_matches = [l for l in mp3_links if "vocal" in l.lower() or "choir" in l.lower()]
                     if vocal_matches:
@@ -334,13 +349,21 @@ def _crawl_hymn_detail(driver: webdriver.Chrome, hymn_id: str, hymn_url: str) ->
     """
     try:
         driver.get(hymn_url)
-        WebDriverWait(driver, JS_DETAIL_WAIT).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "h1, .eden-headings-h1"))
-        )
+    except Exception as e:
+        print(f"[Crawler] [{hymn_id}] Failed to load URL: {e}")
+        return {"scriptures": [], "sheet_music": [], "audio_accompaniment": None, "audio_vocal": None}
 
-        # 1. Scriptures
-        scriptures = []
-        items = driver.find_elements(By.CSS_SELECTOR, "li.eden-list-item a")
+    try:
+        WebDriverWait(driver, JS_DETAIL_WAIT).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "h1, .eden-headings-h1, header, main"))
+        )
+    except Exception:
+        pass
+
+    # 1. Scriptures
+    scriptures = []
+    try:
+        items = driver.find_elements(By.CSS_SELECTOR, "li.eden-list-item a, a[href*='/study/scriptures']")
         for el in items:
             raw_text = el.text.strip()
             if not raw_text:
@@ -350,34 +373,33 @@ def _crawl_hymn_detail(driver: webdriver.Chrome, hymn_id: str, hymn_url: str) ->
                 "reference": _normalize_text(raw_text),
                 "url":       _normalize_url(href),
             })
-
-        # 2. Sheet music images
-        sheet_music = _extract_sheet_music_images(driver, hymn_id)
-
-        # 3. Audio Accompaniment & Vocal (Choir) MP3
-        acc_url, vocal_url = _extract_audio_urls_from_page(driver)
-        audio_accompaniment = (
-            _download_audio_file(acc_url, AUDIO_ACCOMPANIMENT_DIR, hymn_id, "Accompaniment")
-            if acc_url else None
-        )
-        audio_vocal = (
-            _download_audio_file(vocal_url, AUDIO_VOCAL_DIR, hymn_id, "Vocal")
-            if vocal_url else None
-        )
-
-        return {
-            "scriptures":          scriptures,
-            "sheet_music":         sheet_music,
-            "audio_accompaniment": audio_accompaniment,
-            "audio_vocal":         audio_vocal,
-        }
     except Exception:
-        return {
-            "scriptures":          [],
-            "sheet_music":         [],
-            "audio_accompaniment": None,
-            "audio_vocal":         None,
-        }
+        pass
+
+    # 2. Sheet music images
+    sheet_music = []
+    try:
+        sheet_music = _extract_sheet_music_images(driver, hymn_id)
+    except Exception:
+        pass
+
+    # 3. Audio Accompaniment & Vocal (Choir) MP3
+    acc_url, vocal_url = _extract_audio_urls_from_page(driver)
+    audio_accompaniment = (
+        _download_audio_file(acc_url, AUDIO_ACCOMPANIMENT_DIR, hymn_id, "Accompaniment")
+        if acc_url else None
+    )
+    audio_vocal = (
+        _download_audio_file(vocal_url, AUDIO_VOCAL_DIR, hymn_id, "Vocal")
+        if vocal_url else None
+    )
+
+    return {
+        "scriptures":          scriptures,
+        "sheet_music":         sheet_music,
+        "audio_accompaniment": audio_accompaniment,
+        "audio_vocal":         audio_vocal,
+    }
 
 
 def _crawl_single_page(driver: webdriver.Chrome, url: str, name: str, collection_code: str = "hymns") -> list[dict]:
