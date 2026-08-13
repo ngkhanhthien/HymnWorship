@@ -38,9 +38,12 @@ export class HymnDataService {
           title: String(item.title || ''),
           id: item.id ? String(item.id) : undefined,
           url: item.url,
+          collection: item.collection,
+          collection_name: item.collection_name,
           scriptures: item.scriptures || [],
           sheet_music: item.sheet_music || [],
           audio_accompaniment: item.audio_accompaniment || undefined,
+          audio_vocal: item.audio_vocal || undefined,
         }))
       ),
       catchError((error) => {

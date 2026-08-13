@@ -66,9 +66,10 @@ OUTPUT_DIR              = "app/output"
 SHEET_MUSIC_DIR         = "app/output/sheet_music"
 AUDIO_DIR               = "app/output/audio"
 AUDIO_ACCOMPANIMENT_DIR = "app/output/audio/accompaniment"
+AUDIO_VOCAL_DIR         = "app/output/audio/vocal"
 
-# Number of hymns to crawl detail pages for testing (e.g. 3) or "all" to crawl all hymns
-HYMN_DETAIL_CRAWL_LIMIT = "all"
+# Number of hymns to crawl detail pages for testing (e.g. 5) or "all" to crawl all hymns
+HYMN_DETAIL_CRAWL_LIMIT = 5
 
 # Force re-download/refresh sh
 # eet music images even if they already exist locally.

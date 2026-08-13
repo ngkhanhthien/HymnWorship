@@ -44,13 +44,22 @@ def main() -> None:
     logger.info("Starting crawl for all collections...")
     collections = crawl_all_collections()
 
-    # Step 3: Save each collection to its own JSON file
+    # Step 3: Combine all collections into a single merged list and save to 1 JSON file
+    all_hymns = []
+    seen_ids = set()
+
     for col in collections:
         if not col["hymns"]:
             logger.warning(f"[{col['name']}] No hymns found — skipping.")
             continue
 
         logger.info(f"[{col['name']}] Total : {len(col['hymns'])} hymns")
+        for h in col["hymns"]:
+            hymn_key = f"{h.get('collection', '')}_{h['id']}"
+            if hymn_key not in seen_ids:
+                seen_ids.add(hymn_key)
+                all_hymns.append(h)
+
         for h in col["hymns"][:3]:
             script_items = h.get("scriptures", [])
             if script_items:
@@ -66,10 +75,16 @@ def main() -> None:
             else:
                 scripts = "(none)"
             sheets = ", ".join(h.get("sheet_music", [])) or "(none)"
-            audio  = h.get("audio_accompaniment") or "(none)"
-            logger.info(f"  #{h['id']:>3} {h['title']} | Scriptures: {scripts} | Sheet Music: {sheets} | Audio: {audio}")
+            acc_audio = h.get("audio_accompaniment") or "(none)"
+            voc_audio = h.get("audio_vocal") or "(none)"
+            logger.info(f"  #{h['id']:>3} {h['title']} | Sheets: {sheets} | Acc: {acc_audio} | Vocal: {voc_audio}")
 
-        save_json(col["hymns"], col["output_file"])
+    # Save all hymns combined into 1 single JSON file
+    if all_hymns:
+        output_file_path = save_json(all_hymns, "hymns")
+        logger.info(f"Saved {len(all_hymns)} combined hymns into single JSON file: {output_file_path}")
+    else:
+        logger.warning("No hymns collected to save.")
 
     logger.info("=======================================================")
     logger.info("  HymnWorship Backend Crawl Completed")
