@@ -17,14 +17,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.crawler.hymns_crawler import check_connection, crawl_all_collections
 from app.crawler.save_json import save_json
+from app.sync_data.sync_firebase.firebase_syncer import sync_hymns_to_firebase
 from app.utils.logger import get_logger
-from app.sync_data.sync_local.local_syncer import sync_output_to_local_assets
 
 logger = get_logger("main")
 
 
 def main() -> None:
-    """Entry point: verify connection, crawl all hymn collections, and optionally sync to Frontend."""
+    """Entry point: verify connection, crawl all hymn collections, and sync to Firebase."""
     logger.info("=======================================================")
     logger.info("  HymnWorship Backend Execution Started")
     logger.info("=======================================================")
@@ -90,22 +90,14 @@ def main() -> None:
     logger.info("  HymnWorship Backend Crawl Completed")
     logger.info("=======================================================")
 
-    # Step 4: Prompt user for sync to Frontend local assets
-    print("\n-------------------------------------------------------")
-    try:
-        user_choice = input("Do you want to update crawled data to Frontend/public/assets? (yes/no): ").strip().lower()
-    except (EOFError, KeyboardInterrupt):
-        user_choice = "no"
-
-    if user_choice in ["yes", "y"]:
-        logger.info("User confirmed YES. Synchronizing data to Frontend local assets...")
-        success = sync_output_to_local_assets()
+    # Step 4: Synchronize directly to Firebase (Firestore & Cloud Storage)
+    if all_hymns:
+        logger.info("Uploading crawled media and metadata directly to Firebase...")
+        success = sync_hymns_to_firebase(all_hymns)
         if success:
-            logger.info("Sync completed successfully.")
+            logger.info("Firebase sync completed successfully!")
         else:
-            logger.error("Sync encountered errors.")
-    else:
-        logger.info("User selected NO (or skipped). Data remains saved in Backend/app/output/.")
+            logger.error("Firebase sync encountered errors.")
 
     logger.info("=======================================================")
     logger.info("  HymnWorship Backend Execution Completed")
