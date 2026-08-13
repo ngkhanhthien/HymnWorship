@@ -25,8 +25,8 @@ export class SettingsService {
     },
   ];
 
-  /** Selected data source mode, default is 'local' */
-  readonly dataSource = signal<DataSourceMode>('local');
+  /** Selected data source mode, default is 'firebase' */
+  readonly dataSource = signal<DataSourceMode>('firebase');
 
   setDataSource(mode: DataSourceMode): void {
     this.dataSource.set(mode);

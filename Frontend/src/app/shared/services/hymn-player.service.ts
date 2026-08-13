@@ -40,10 +40,14 @@ export class HymnPlayerService {
     // Stop and cleanup existing audio
     this.stopAudio();
 
-    // Determine audio URL
+    // Determine audio URL (prioritize Firebase Cloud Storage URL)
     let audioUrl = `/assets/hymns/audio/accompaniment/${hymn.number}.mp3`;
-    if (hymn.audio_accompaniment) {
-      audioUrl = hymn.audio_accompaniment.replace(/^app\/output\//, '/assets/hymns/');
+    if (hymn.audio_accompaniment_url) {
+      audioUrl = hymn.audio_accompaniment_url;
+    } else if (hymn.audio_accompaniment) {
+      audioUrl = hymn.audio_accompaniment.startsWith('http')
+        ? hymn.audio_accompaniment
+        : hymn.audio_accompaniment.replace(/^app\/output\//, '/assets/hymns/');
     }
 
     // Create and configure new Audio instance

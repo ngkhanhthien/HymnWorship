@@ -12,6 +12,9 @@ export interface Hymn {
   collection_name?: string;
   scriptures?: ScriptureRef[];
   sheet_music?: string[];
+  sheet_music_urls?: string[];
   audio_accompaniment?: string;
+  audio_accompaniment_url?: string;
   audio_vocal?: string;
+  audio_vocal_url?: string;
 }

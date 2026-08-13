@@ -95,9 +95,18 @@ export class HymnPageComponent {
   });
 
   /** Computed URL for sheet music PNG image */
-  readonly sheetMusicUrl = computed<string>(
-    () => `/assets/hymns/sheet_music/${this.displayHymn().number}.png`
-  );
+  readonly sheetMusicUrl = computed<string>(() => {
+    const hymn = this.displayHymn();
+    if (hymn.sheet_music_urls && hymn.sheet_music_urls.length > 0) {
+      return hymn.sheet_music_urls[0];
+    }
+    if (hymn.sheet_music && hymn.sheet_music.length > 0) {
+      const first = hymn.sheet_music[0];
+      if (first.startsWith('http')) return first;
+      return first.replace(/^app\/output\//, '/assets/hymns/');
+    }
+    return `/assets/hymns/sheet_music/${hymn.number}.png`;
+  });
 
   /** Computed list of notes attached to currently displayed hymn */
   readonly currentNotes = computed<Note[]>(() => {
