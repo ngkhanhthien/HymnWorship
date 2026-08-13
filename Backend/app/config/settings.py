@@ -14,8 +14,9 @@ LOG_FILE_PATH  = os.path.join(LOGS_DIR, LOG_FILE_NAME)
 LOG_LEVEL      = "INFO"
 
 # ─── Firebase Configuration ───────────────────────────────────────────────────
+FIREBASE_PROJECT_ID   = "qthymns1"
 FIREBASE_KEY_DIR      = os.path.join(APP_DIR, "config", "key")
-STORAGE_BUCKET_NAME   = "qt-hymns.appspot.com"
+STORAGE_BUCKET_NAME   = "qthymns1.firebasestorage.app"
 FIRESTORE_COLLECTION  = "hymns"
 
 # ─── Execution Mode ───────────────────────────────────────────────────────────

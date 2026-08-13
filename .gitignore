@@ -3,10 +3,13 @@
 **/config/key/
 Backend/app/config/key/
 *firebase-adminsdk*.json
+*adminsdk*.json
 *.key
 *.pem
 *.p12
 *.pfx
+*Private_key*
+Private_key
 
 # Output files & Frontend local assets
 **/output/
