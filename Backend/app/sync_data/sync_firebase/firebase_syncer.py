@@ -26,6 +26,9 @@ from app.config.settings import (
     STORAGE_BUCKET_NAME,
     FIRESTORE_COLLECTION,
     OUTPUT_DIR,
+    SHEET_MUSIC_DIR,
+    AUDIO_ACCOMPANIMENT_DIR,
+    AUDIO_VOCAL_DIR,
     HYMN_DETAIL_CRAWL_LIMIT,
 )
 from app.sync_data.sync_firebase.sync_firebase import (
@@ -98,19 +101,30 @@ def build_hymn_document(
     collection_name = hymn.get("collection_name", "Hymns")
 
     # 1. Sheet music images
-    sheet_music_paths = hymn.get("sheet_music", []) or []
+    sheet_music_paths = list(hymn.get("sheet_music") or [])
     sheet_music_urls: List[str] = []
 
-    # Upload local files if present
-    for local_sheet in sheet_music_paths:
-        sheet_filename = os.path.basename(local_sheet)
-        storage_dest = f"sheet_music/{sheet_filename}"
-        url = upload_media_file(bucket, local_sheet, storage_dest, "image/png")
-        if url and url not in sheet_music_urls:
-            sheet_music_urls.append(url)
-            existing_storage_paths.add(storage_dest)
+    # Check local SHEET_MUSIC_DIR if not provided in hymn dict
+    if not sheet_music_paths and os.path.exists(SHEET_MUSIC_DIR):
+        single_local = os.path.join(SHEET_MUSIC_DIR, f"{hymn_id}.png")
+        if os.path.exists(single_local):
+            sheet_music_paths.append(single_local.replace("\\", "/"))
+        for p in range(1, 10):
+            multi_local = os.path.join(SHEET_MUSIC_DIR, f"{hymn_id}_{p}.png")
+            if os.path.exists(multi_local):
+                sheet_music_paths.append(multi_local.replace("\\", "/"))
 
-    # Auto-discover from Storage (e.g. manually uploaded sheet music)
+    # Upload local sheet music files if present
+    for local_sheet in sheet_music_paths:
+        if os.path.exists(local_sheet):
+            sheet_filename = os.path.basename(local_sheet)
+            storage_dest = f"sheet_music/{sheet_filename}"
+            url = upload_media_file(bucket, local_sheet, storage_dest, "image/png")
+            if url and url not in sheet_music_urls:
+                sheet_music_urls.append(url)
+                existing_storage_paths.add(storage_dest)
+
+    # Auto-discover from Storage (for files uploaded directly to Firebase)
     single_sheet_dest = f"sheet_music/{hymn_id}.png"
     if single_sheet_dest in existing_storage_paths:
         url = make_storage_url(bucket.name, single_sheet_dest)
@@ -126,6 +140,11 @@ def build_hymn_document(
 
     # 2. Accompaniment audio
     acc_path = hymn.get("audio_accompaniment")
+    if not acc_path and os.path.exists(AUDIO_ACCOMPANIMENT_DIR):
+        local_acc = os.path.join(AUDIO_ACCOMPANIMENT_DIR, f"{hymn_id}.mp3")
+        if os.path.exists(local_acc):
+            acc_path = local_acc.replace("\\", "/")
+
     acc_url: Optional[str] = None
     if acc_path and os.path.exists(acc_path):
         acc_filename = os.path.basename(acc_path)
@@ -140,6 +159,11 @@ def build_hymn_document(
 
     # 3. Vocal audio
     vocal_path = hymn.get("audio_vocal")
+    if not vocal_path and os.path.exists(AUDIO_VOCAL_DIR):
+        local_vocal = os.path.join(AUDIO_VOCAL_DIR, f"{hymn_id}.mp3")
+        if os.path.exists(local_vocal):
+            vocal_path = local_vocal.replace("\\", "/")
+
     vocal_url: Optional[str] = None
     if vocal_path and os.path.exists(vocal_path):
         vocal_filename = os.path.basename(vocal_path)
