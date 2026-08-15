@@ -1,35 +1,51 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { Observable, tap, map, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap, map, of, catchError } from 'rxjs';
 import { Hymn } from '../models/hymn';
-import { TenDayPlan, DaySchedule } from '../models/schedule';
-import { HymnDataService } from './hymn-data.service';
-import { getRandomItems, formatDateKey, getDayOfYear } from '../utils/random.util';
+import { YearlySchedulePlan, DaySchedule } from '../models/schedule';
+import { formatDateKey, getDayOfYear } from '../utils/random.util';
 
-const STORAGE_KEY = 'hymnworship_10day_plan_v2';
+const STORAGE_KEY = 'hymnworship_yearly_schedule_v1';
+const ASSETS_PATH = 'assets/data/yearly-schedule.json';
+const FALLBACK_ASSETS_PATH = 'assets/hymns/yearly-schedule.json';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScheduleService {
-  private readonly hymnDataService = inject(HymnDataService);
+  private readonly http = inject(HttpClient);
 
-  /** Currently loaded 10-day schedule plan signal */
-  readonly currentPlan = signal<TenDayPlan | null>(this.loadFromStorage());
+  /** Currently loaded full 366-day schedule plan */
+  readonly currentPlan = signal<YearlySchedulePlan | null>(this.loadFromStorage());
 
   /** Selected date key ('YYYY-MM-DD'), default is Today */
   readonly selectedDate = signal<string>(formatDateKey(new Date()));
 
-  /** Reactive computed signal returning hymns for the selected date (Sequential Main Hymn + 3 Suggestions) */
+  /** Reactive computed signal returning hymns for the selected date (1 Default Hymn + 3 Suggestions) */
   readonly selectedDayHymns = computed<Hymn[]>(() => {
     const plan = this.currentPlan();
-    if (!plan || !plan.days || plan.days.length === 0) {
-      return [];
+    const dateKey = this.selectedDate();
+    const targetDate = new Date(dateKey + 'T00:00:00');
+    const dayOfYear = getDayOfYear(isNaN(targetDate.getTime()) ? new Date() : targetDate);
+    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const day = String(targetDate.getDate()).padStart(2, '0');
+    const monthDayKey = `${month}-${day}`;
+
+    if (plan && plan.days && plan.days.length > 0) {
+      const match = plan.days.find(
+        (d) =>
+          d.dayOfYear === dayOfYear ||
+          d.monthDay === monthDayKey ||
+          d.date === dateKey
+      );
+      if (match && match.hymns && match.hymns.length > 0) {
+        return match.hymns;
+      }
     }
 
-    const dateKey = this.selectedDate();
-    const targetDay = plan.days.find((d) => d.date === dateKey);
-
-    return targetDay ? targetDay.hymns : [];
+    // Fallback if schedule is still loading
+    const defaultHymnNum = String(((dayOfYear - 1) % 423) + 1);
+    return [{ id: defaultHymnNum, number: defaultHymnNum, title: `Hymn #${defaultHymnNum}` }];
   });
 
   /** Update currently selected date */
@@ -38,93 +54,55 @@ export class ScheduleService {
   }
 
   /**
-   * Generates a fresh 10-day schedule plan:
-   * - Each day has 1 sequential main hymn (day 1 is hymn 1, day 2 is hymn 2, etc. wrapping after 423 hymns)
-   * - Followed by 3 additional random suggestion hymns.
+   * Load the 366-day persistent yearly schedule:
+   * 1. Checks localStorage for instant offline access
+   * 2. Fetches static JSON from assets/data/yearly-schedule.json
+   * 3. Saves to localStorage and updates reactive signal
    */
-  generate10DayPlan(): Observable<TenDayPlan> {
-    return this.hymnDataService.getHymns().pipe(
-      map((allHymns: Hymn[]): TenDayPlan => {
-        // Sort hymns by numeric ID (1..341, 1001..1210)
-        const sortedHymns = [...allHymns].sort((a, b) => {
-          const numA = Number(a.id || a.number || 0);
-          const numB = Number(b.id || b.number || 0);
-          return numA - numB;
-        });
+  loadYearlySchedule(): Observable<YearlySchedulePlan> {
+    const cached = this.loadFromStorage();
+    if (cached && cached.days && cached.days.length >= 365) {
+      this.currentPlan.set(cached);
+      return of(cached);
+    }
 
-        const today = new Date();
-        const days: DaySchedule[] = [];
-
-        for (let i = 0; i < 10; i++) {
-          const nextDate = new Date(today);
-          nextDate.setDate(today.getDate() + i);
-
-          const dateString = formatDateKey(nextDate);
-          const dayOfYear = getDayOfYear(nextDate);
-
-          // Sequential index based on day of year (0-indexed)
-          const sequentialIndex = (dayOfYear - 1) % sortedHymns.length;
-          const mainHymn = sortedHymns[sequentialIndex];
-
-          // 3 additional suggestions excluding the main hymn
-          const remainingHymns = sortedHymns.filter(
-            (h) => (h.id || h.number) !== (mainHymn.id || mainHymn.number)
-          );
-          const suggestions = getRandomItems<Hymn>(remainingHymns, 3);
-
-          days.push({
-            date: dateString,
-            hymns: [mainHymn, ...suggestions],
-          });
+    return this.http.get<YearlySchedulePlan>(ASSETS_PATH).pipe(
+      catchError(() => this.http.get<YearlySchedulePlan>(FALLBACK_ASSETS_PATH)),
+      tap((plan: YearlySchedulePlan) => {
+        if (plan && plan.days) {
+          this.saveToStorage(plan);
+          this.currentPlan.set(plan);
         }
-
-        return {
-          generatedAt: new Date().toISOString(),
-          days,
-        };
-      }),
-      tap((newPlan: TenDayPlan) => {
-        this.saveToStorage(newPlan);
-        this.currentPlan.set(newPlan);
-        this.selectedDate.set(formatDateKey(new Date()));
       })
     );
   }
 
   /**
-   * Checks if valid plan exists in localStorage. If missing or expired,
-   * automatically generates and saves a new sequential 10-day plan.
+   * Startup hook: Ensures the 366-day schedule is loaded into memory on application launch.
    */
-  checkAndAutoSchedule(): Observable<TenDayPlan> {
-    const existingPlan = this.loadFromStorage();
-    const todayStr = formatDateKey(new Date());
-
-    if (existingPlan && existingPlan.days && existingPlan.days.length >= 10) {
-      const hasToday = existingPlan.days.some((d) => d.date === todayStr);
-      if (hasToday) {
-        this.currentPlan.set(existingPlan);
-        return of(existingPlan);
-      }
-    }
-
-    // Auto-generate sequential 10-day plan if missing or expired
-    return this.generate10DayPlan();
+  checkAndAutoSchedule(): Observable<YearlySchedulePlan> {
+    return this.loadYearlySchedule();
   }
 
-  private loadFromStorage(): TenDayPlan | null {
+  /** Backward-compatibility method */
+  generate10DayPlan(): Observable<YearlySchedulePlan> {
+    return this.loadYearlySchedule();
+  }
+
+  private loadFromStorage(): YearlySchedulePlan | null {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as TenDayPlan) : null;
+      return raw ? (JSON.parse(raw) as YearlySchedulePlan) : null;
     } catch {
       return null;
     }
   }
 
-  private saveToStorage(plan: TenDayPlan): void {
+  private saveToStorage(plan: YearlySchedulePlan): void {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
     } catch (e) {
-      console.error('Error saving schedule plan to localStorage:', e);
+      console.error('Error saving yearly schedule to localStorage:', e);
     }
   }
 }

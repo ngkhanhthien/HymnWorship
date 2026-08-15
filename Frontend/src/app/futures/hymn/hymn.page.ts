@@ -58,9 +58,11 @@ export class HymnPageComponent {
   /** Computed fallback: first hymn in today's schedule suggestion list */
   private readonly defaultTodayHymn = computed<Hymn>(() => {
     const plan = this.scheduleService.currentPlan();
-    const todayStr = formatDateKey(new Date());
+    const today = new Date();
+    const todayStr = formatDateKey(today);
+    const todayMonthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     if (plan && plan.days) {
-      const todayDay = plan.days.find((d) => d.date === todayStr);
+      const todayDay = plan.days.find((d) => d.date === todayStr || d.monthDay === todayMonthDay);
       if (todayDay && todayDay.hymns && todayDay.hymns.length > 0) {
         return todayDay.hymns[0];
       }

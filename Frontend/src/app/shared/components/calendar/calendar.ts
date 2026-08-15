@@ -28,7 +28,11 @@ export class CalendarComponent {
     const dateStr = `${year}-${month}-${dayNum}`;
 
     const plan = this.scheduleService.currentPlan();
-    if (plan && plan.days && plan.days.some((d) => d.date === dateStr)) {
+    if (
+      plan &&
+      plan.days &&
+      plan.days.some((d) => d.date === dateStr || d.monthDay === `${month}-${dayNum}`)
+    ) {
       return ['#ec4899'];
     }
     return [];

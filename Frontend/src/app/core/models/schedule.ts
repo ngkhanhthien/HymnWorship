@@ -1,11 +1,22 @@
 import { Hymn } from './hymn';
 
 export interface DaySchedule {
-  date: string; // ISO date string 'YYYY-MM-DD'
-  hymns: Hymn[]; // List of 3 hymns assigned to this day
+  dayOfYear?: number; // 1-366
+  month?: number; // 1-12
+  day?: number; // 1-31
+  monthDay?: string; // 'MM-DD'
+  date?: string; // Optional 'YYYY-MM-DD'
+  defaultHymn?: Hymn;
+  suggestions?: Hymn[];
+  hymns: Hymn[]; // [defaultHymn, ...suggestions] (4 hymns total)
 }
 
-export interface TenDayPlan {
-  generatedAt: string; // ISO timestamp string
-  days: DaySchedule[]; // List of 10 daily schedules
+export interface YearlySchedulePlan {
+  totalDays: number;
+  generatedAt: string;
+  days: DaySchedule[];
 }
+
+/** Backward-compatibility alias for 10-day references */
+export type TenDayPlan = YearlySchedulePlan;
+
