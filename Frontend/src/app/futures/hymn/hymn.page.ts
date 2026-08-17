@@ -26,6 +26,9 @@ export class HymnPageComponent {
   private readonly noteService = inject(NoteService);
   private readonly hymnDataService = inject(HymnDataService);
 
+  /** Sequential main hymn + 3 suggestions for selected date */
+  readonly selectedDayHymns = this.scheduleService.selectedDayHymns;
+
   /** All hymns signal for looking up rich metadata (scriptures, audio, sheet music) */
   readonly allHymns = toSignal(this.hymnDataService.getHymns());
 

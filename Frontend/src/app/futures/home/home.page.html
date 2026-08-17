@@ -83,7 +83,7 @@
             <button
               type="button"
               class="mt-1 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition"
-              (click)="playerService.toggle(displayHymn)"
+              (click)="playerService.toggle(displayHymn, scheduledHymns())"
               [attr.aria-label]="playerService.isAudioPlaying() && playerService.currentPlayingId() === displayHymn.number ? 'Pause' : 'Play'"
             >
               @if (playerService.isAudioPlaying() && playerService.currentPlayingId() === displayHymn.number) {
@@ -115,6 +115,7 @@
               [number]="hymn.number"
               [title]="hymn.title"
               [isFeatured]="idx === 0"
+              [playlist]="scheduledHymns()"
             />
           } @empty {
             <p class="text-sm text-gray-400 italic py-2">No hymns scheduled for this date.</p>

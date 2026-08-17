@@ -17,6 +17,9 @@ export class HymnPlayerService {
   /** Total audio duration in seconds */
   readonly duration = signal<number>(0);
 
+  /** Currently active playlist queue */
+  readonly currentPlaylist = signal<Hymn[]>([]);
+
   /** Derived: the number/id of the currently playing hymn */
   readonly currentPlayingId = computed(() => this.currentPlaying()?.number ?? null);
 
@@ -26,7 +29,17 @@ export class HymnPlayerService {
     return dur > 0 ? (this.currentTime() / dur) * 100 : 0;
   });
 
-  play(hymn: Hymn): void {
+  play(hymn: Hymn, playlist?: Hymn[]): void {
+    if (playlist && playlist.length > 0) {
+      this.currentPlaylist.set(playlist);
+    } else if (
+      !this.currentPlaylist().some(
+        (h) => String(h.number) === String(hymn.number)
+      )
+    ) {
+      this.currentPlaylist.set([]);
+    }
+
     const current = this.currentPlaying();
 
     // If clicking the same hymn while paused, resume playback
@@ -73,6 +86,19 @@ export class HymnPlayerService {
     this.audio.onended = () => {
       this.isAudioPlaying.set(false);
       this.currentTime.set(0);
+
+      // Auto-play next hymn in active playlist if available
+      const list = this.currentPlaylist();
+      const currentHymn = this.currentPlaying();
+      if (list.length > 0 && currentHymn) {
+        const idx = list.findIndex(
+          (h) => String(h.number) === String(currentHymn.number)
+        );
+        if (idx >= 0 && idx < list.length - 1) {
+          const nextHymn = list[idx + 1];
+          this.play(nextHymn, list);
+        }
+      }
     };
     this.audio.onerror = (err) => {
       console.warn(`Could not load audio from ${audioUrl}:`, err);
@@ -102,16 +128,16 @@ export class HymnPlayerService {
     }
   }
 
-  toggle(hymn: Hymn): void {
+  toggle(hymn: Hymn, playlist?: Hymn[]): void {
     const current = this.currentPlaying();
     if (current && current.number === hymn.number) {
       if (this.isAudioPlaying()) {
         this.pause();
       } else {
-        this.play(hymn);
+        this.play(hymn, playlist);
       }
     } else {
-      this.play(hymn);
+      this.play(hymn, playlist);
     }
   }
 
