@@ -91,7 +91,9 @@ export class HymnPageComponent {
 
     const hymnsList = (this.allHymns() ?? []) as Hymn[];
     const fullHymn = hymnsList.find(
-      (h: Hymn) => String(h.number) === String(rawHymn.number)
+      (h: Hymn) =>
+        String(h.number) === String(rawHymn.number) ||
+        String(h.id) === String(rawHymn.number)
     );
 
     return fullHymn ? { ...rawHymn, ...fullHymn } : rawHymn;
@@ -105,15 +107,8 @@ export class HymnPageComponent {
   /** Computed URL for sheet music PNG image */
   readonly sheetMusicUrl = computed<string>(() => {
     const hymn = this.displayHymn();
-    if (hymn.sheet_music_urls && hymn.sheet_music_urls.length > 0) {
-      return hymn.sheet_music_urls[0];
-    }
-    if (hymn.sheet_music && hymn.sheet_music.length > 0) {
-      const first = hymn.sheet_music[0];
-      if (first.startsWith('http')) return first;
-      return first.replace(/^app\/output\//, '/assets/hymns/');
-    }
-    return `/assets/hymns/sheet_music/${hymn.number}.png`;
+    const hymnId = hymn.number || hymn.id || '1';
+    return `/assets/hymns/sheet_music/${hymnId}.png`;
   });
 
   /** Computed list of notes attached to currently displayed hymn */
@@ -129,11 +124,17 @@ export class HymnPageComponent {
 
   selectTab(tab: 'pdf' | 'lyrics'): void {
     this.activeTab.set(tab);
-    this.imageError.set(false);
   }
 
-  onImageError(): void {
-    this.imageError.set(true);
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      const hymnId = this.displayHymn().number || this.displayHymn().id || '1';
+      const remoteUrl = `https://storage.googleapis.com/qthymns1.firebasestorage.app/sheet_music/${hymnId}.png`;
+      if (!img.src.includes(remoteUrl)) {
+        img.src = remoteUrl;
+      }
+    }
   }
 
   onAddNote(): void {

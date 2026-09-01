@@ -78,10 +78,18 @@ def upload_media_file(
         public_url = make_storage_url(bucket.name, storage_path)
 
         if not force_upload and blob.exists():
-            return public_url
+            try:
+                blob.make_public()
+            except Exception:
+                pass
+            return blob.public_url or public_url
 
         blob.upload_from_filename(local_path, content_type=content_type)
-        return public_url
+        try:
+            blob.make_public()
+        except Exception:
+            pass
+        return blob.public_url or public_url
     except Exception as e:
         logger.warning(f"Failed to upload '{local_path}' to Storage '{storage_path}': {e}")
         return None

@@ -33,16 +33,12 @@
     <div class="tab-body">
       @if (activeTab() === 'pdf') {
         <div class="sheet-music-wrapper">
-          @if (!imageError()) {
-            <img
-              [src]="sheetMusicUrl()"
-              [alt]="displayHymn().title + ' Sheet Music'"
-              class="sheet-music-img"
-              (error)="onImageError()"
-            />
-          } @else {
-            <p class="coming-soon-label">Sheet music image not available for hymn #{{ displayHymn().number }}.</p>
-          }
+          <img
+            [src]="sheetMusicUrl()"
+            [alt]="displayHymn().title + ' Sheet Music'"
+            class="sheet-music-img"
+            (error)="onImageError($event)"
+          />
         </div>
       } @else {
         <div class="lyrics-wrapper">

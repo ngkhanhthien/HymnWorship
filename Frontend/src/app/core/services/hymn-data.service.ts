@@ -5,7 +5,7 @@ import { Hymn } from '../models/hymn';
 import { SettingsService } from './settings.service';
 
 const FIREBASE_HYMNS_URL =
-  'https://firebasestorage.googleapis.com/v0/b/qthymns1.firebasestorage.app/o/data%2Fhymns.json?alt=media';
+  'https://storage.googleapis.com/qthymns1.firebasestorage.app/data/hymns.json';
 
 @Injectable({
   providedIn: 'root',
