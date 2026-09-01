@@ -394,6 +394,13 @@ def _crawl_hymn_detail(driver: webdriver.Chrome, hymn_id: str, hymn_url: str) ->
         if vocal_url else None
     )
 
+    # Enrich scriptures with English verse text content
+    try:
+        from app.crawler.scriptures_crawler import enrich_hymn_scriptures
+        scriptures = enrich_hymn_scriptures(scriptures)
+    except Exception as e:
+        print(f"[Crawler] [{hymn_id}] Scripture enrichment warning: {e}")
+
     return {
         "scriptures":          scriptures,
         "sheet_music":         sheet_music,
