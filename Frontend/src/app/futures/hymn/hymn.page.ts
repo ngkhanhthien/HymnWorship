@@ -35,6 +35,9 @@ export class HymnPageComponent {
   /** Active Tab signal ('pdf' or 'lyrics'), default is 'pdf' */
   readonly activeTab = signal<'pdf' | 'lyrics'>('pdf');
 
+  /** Currently selected scripture for right-side drawer view */
+  readonly selectedScripture = signal<ScriptureRef | null>(null);
+
   /** Track image load error state */
   readonly imageError = signal<boolean>(false);
 
@@ -148,5 +151,19 @@ export class HymnPageComponent {
 
   onDeleteNote(noteId: string): void {
     this.noteService.deleteNote(noteId);
+  }
+
+  selectScripture(scripture: ScriptureRef): void {
+    this.selectedScripture.set(scripture);
+  }
+
+  closeScriptureModal(): void {
+    this.selectedScripture.set(null);
+  }
+
+  openScriptureUrl(url?: string): void {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   }
 }

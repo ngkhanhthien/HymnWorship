@@ -1,6 +1,7 @@
 export interface ScriptureRef {
   reference: string;
   url?: string;
+  text?: string;
 }
 
 export interface Hymn {
