@@ -224,6 +224,7 @@ def _extract_sheet_music_images(driver: webdriver.Chrome, hymn_id: str) -> list[
         WebDriverWait(driver, JS_DETAIL_WAIT).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "canvas"))
         )
+        time.sleep(3)  # Wait for Verovio canvas renderer to finish drawing sheet music notation
         canvases = driver.find_elements(By.CSS_SELECTOR, "canvas")
         if not canvases:
             return saved_paths
