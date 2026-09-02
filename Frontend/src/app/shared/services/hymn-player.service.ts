@@ -20,6 +20,25 @@ export class HymnPlayerService {
   /** Currently active playlist queue */
   readonly currentPlaylist = signal<Hymn[]>([]);
 
+  /** Selected audio mode: 'accompaniment' or 'vocal' */
+  readonly selectedAudioMode = signal<'accompaniment' | 'vocal'>('accompaniment');
+
+  setAudioMode(mode: 'accompaniment' | 'vocal'): void {
+    if (this.selectedAudioMode() === mode) return;
+    this.selectedAudioMode.set(mode);
+
+    // If audio is currently playing or loaded, restart audio with newly selected track mode
+    const current = this.currentPlaying();
+    if (current) {
+      const wasPlaying = this.isAudioPlaying();
+      this.stopAudio();
+      this.play(current, this.currentPlaylist());
+      if (!wasPlaying) {
+        this.pause();
+      }
+    }
+  }
+
   /** Derived: the number/id of the currently playing hymn */
   readonly currentPlayingId = computed(() => this.currentPlaying()?.number ?? null);
 
@@ -53,14 +72,30 @@ export class HymnPlayerService {
     // Stop and cleanup existing audio
     this.stopAudio();
 
-    // Determine audio URL (prioritize Firebase Cloud Storage URL)
-    let audioUrl = `/assets/hymns/audio/accompaniment/${hymn.number}.mp3`;
-    if (hymn.audio_accompaniment_url) {
-      audioUrl = hymn.audio_accompaniment_url;
-    } else if (hymn.audio_accompaniment) {
-      audioUrl = hymn.audio_accompaniment.startsWith('http')
-        ? hymn.audio_accompaniment
-        : hymn.audio_accompaniment.replace(/^app\/output\//, '/assets/hymns/');
+    // Determine audio URL based on selected audio mode
+    let audioUrl = '';
+    const mode = this.selectedAudioMode();
+
+    if (mode === 'vocal') {
+      if (hymn.audio_vocal_url) {
+        audioUrl = hymn.audio_vocal_url;
+      } else if (hymn.audio_vocal) {
+        audioUrl = hymn.audio_vocal.startsWith('http')
+          ? hymn.audio_vocal
+          : hymn.audio_vocal.replace(/^app\/output\//, '/assets/hymns/');
+      } else {
+        audioUrl = `/assets/hymns/audio/vocal/${hymn.number}.mp3`;
+      }
+    } else {
+      if (hymn.audio_accompaniment_url) {
+        audioUrl = hymn.audio_accompaniment_url;
+      } else if (hymn.audio_accompaniment) {
+        audioUrl = hymn.audio_accompaniment.startsWith('http')
+          ? hymn.audio_accompaniment
+          : hymn.audio_accompaniment.replace(/^app\/output\//, '/assets/hymns/');
+      } else {
+        audioUrl = `/assets/hymns/audio/accompaniment/${hymn.number}.mp3`;
+      }
     }
 
     // Create and configure new Audio instance

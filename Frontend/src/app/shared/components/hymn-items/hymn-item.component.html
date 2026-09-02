@@ -26,8 +26,22 @@
         </svg>
       }
     </button>
-    <div class="hymn-info-group" (click)="navigateToHymn()">
-      <span class="hymn-label">{{ number }}. {{ title }}</span>
+    <div class="hymn-info-group">
+      <div class="title-select-stack">
+        <span class="hymn-label" (click)="navigateToHymn()">{{ number }}. {{ title }}</span>
+        <div class="audio-mode-select-wrapper">
+          <select
+            class="audio-mode-select"
+            [value]="playerService.selectedAudioMode()"
+            (change)="onAudioModeChange($event)"
+            (click)="$event.stopPropagation()"
+            title="Audio Track Mode"
+          >
+            <option value="accompaniment">Accompaniment</option>
+            <option value="vocal">Vocal (Choir)</option>
+          </select>
+        </div>
+      </div>
       @if (isFeatured) {
         <span class="featured-tag">Daily Hymn</span>
       }

@@ -48,4 +48,13 @@ export class HymnItemComponent {
       queryParams: { number: this.number, title: this.title },
     });
   }
+
+  onAudioModeChange(event: Event): void {
+    event.stopPropagation();
+    const select = event.target as HTMLSelectElement;
+    if (select) {
+      const mode = select.value as 'accompaniment' | 'vocal';
+      this.playerService.setAudioMode(mode);
+    }
+  }
 }
