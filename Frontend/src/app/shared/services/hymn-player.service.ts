@@ -73,28 +73,25 @@ export class HymnPlayerService {
     this.stopAudio();
 
     // Determine audio URL based on selected audio mode
+    const FIREBASE_STORAGE_BASE = 'https://storage.googleapis.com/qthymns1.firebasestorage.app';
     let audioUrl = '';
     const mode = this.selectedAudioMode();
 
     if (mode === 'vocal') {
       if (hymn.audio_vocal_url) {
         audioUrl = hymn.audio_vocal_url;
-      } else if (hymn.audio_vocal) {
-        audioUrl = hymn.audio_vocal.startsWith('http')
-          ? hymn.audio_vocal
-          : hymn.audio_vocal.replace(/^app\/output\//, '/assets/hymns/');
+      } else if (hymn.audio_vocal && hymn.audio_vocal.startsWith('http')) {
+        audioUrl = hymn.audio_vocal;
       } else {
-        audioUrl = `/assets/hymns/audio/vocal/${hymn.number}.mp3`;
+        audioUrl = `${FIREBASE_STORAGE_BASE}/audio/vocal/${hymn.number}.mp3`;
       }
     } else {
       if (hymn.audio_accompaniment_url) {
         audioUrl = hymn.audio_accompaniment_url;
-      } else if (hymn.audio_accompaniment) {
-        audioUrl = hymn.audio_accompaniment.startsWith('http')
-          ? hymn.audio_accompaniment
-          : hymn.audio_accompaniment.replace(/^app\/output\//, '/assets/hymns/');
+      } else if (hymn.audio_accompaniment && hymn.audio_accompaniment.startsWith('http')) {
+        audioUrl = hymn.audio_accompaniment;
       } else {
-        audioUrl = `/assets/hymns/audio/accompaniment/${hymn.number}.mp3`;
+        audioUrl = `${FIREBASE_STORAGE_BASE}/audio/accompaniment/${hymn.number}.mp3`;
       }
     }
 
@@ -137,6 +134,13 @@ export class HymnPlayerService {
     };
     this.audio.onerror = (err) => {
       console.warn(`Could not load audio from ${audioUrl}:`, err);
+      if (mode === 'vocal') {
+        const fallbackUrl = hymn.audio_accompaniment_url || `${FIREBASE_STORAGE_BASE}/audio/accompaniment/${hymn.number}.mp3`;
+        console.info(`Falling back to accompaniment audio: ${fallbackUrl}`);
+        this.audio = new Audio(fallbackUrl);
+        this.audio.play().catch((e) => console.warn('Fallback play error:', e));
+        return;
+      }
       this.isAudioPlaying.set(false);
     };
 
