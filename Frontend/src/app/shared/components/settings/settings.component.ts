@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SettingsService, DataSourceMode } from '../../../core/services/settings.service';
+import { SettingsService, DataSourceMode, ThemeMode } from '../../../core/services/settings.service';
 import { FirebaseAuthService } from '../../../core/services/firebase-auth.service';
 
 export const SETTINGS_TITLE = 'Settings';
@@ -36,6 +36,20 @@ export class SettingsComponent {
     } else {
       this.localAttemptMessage.set(null);
       this.settingsService.setDataSource(selectedValue);
+    }
+  }
+
+  onThemeModeChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    if (selectElement) {
+      this.settingsService.setThemeMode(selectElement.value as ThemeMode);
+    }
+  }
+
+  onCustomColorChange(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement) {
+      this.settingsService.setCustomColor(inputElement.value);
     }
   }
 }
