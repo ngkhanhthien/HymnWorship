@@ -9,9 +9,15 @@
       </nav>
       <!-- Header Right: User Profile or Sign In Button -->
       @if (authService.currentUser(); as user) {
-        <div class="user-profile-badge" title="{{ user.email }}">
-          <span class="user-avatar-icon">👤</span>
-          <span class="user-email-text">{{ user.displayName || user.email }}</span>
+        <div class="user-profile-group">
+          <div class="user-profile-badge" title="Signed in as {{ user.displayName || user.email }}">
+            <span class="user-avatar-icon">👤</span>
+            <span class="user-email-text">{{ user.displayName || user.email }}</span>
+          </div>
+          <button type="button" class="header-signout-btn" (click)="onSignOut(true)" title="Sign Out & Switch Account">
+            <span class="btn-icon">🚪</span>
+            <span>Sign Out</span>
+          </button>
         </div>
       } @else {
         <button type="button" class="header-login-btn" (click)="openAuthModal('login')">
@@ -42,7 +48,7 @@
             @if (authService.currentUser(); as user) {
               <div class="dropdown-user-header">
                 <span class="user-header-label">Signed in as</span>
-                <span class="user-header-email">{{ user.email }}</span>
+                <span class="user-header-email">{{ user.displayName || user.email }}</span>
               </div>
               <div class="dropdown-divider"></div>
             }
@@ -51,7 +57,11 @@
               <span class="item-text">Settings</span>
             </button>
             @if (authService.currentUser()) {
-              <button type="button" class="dropdown-item signout-item" (click)="onSignOut()">
+              <button type="button" class="dropdown-item" (click)="onSignOut(true)">
+                <span class="item-icon">🔄</span>
+                <span class="item-text">Switch Account</span>
+              </button>
+              <button type="button" class="dropdown-item signout-item" (click)="onSignOut(false)">
                 <span class="item-icon">🚪</span>
                 <span class="item-text">Sign Out</span>
               </button>
