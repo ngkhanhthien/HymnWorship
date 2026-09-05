@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild, TemplateRef, signal } from '@angular/core';
+import { Component, inject, ViewChild, TemplateRef, signal, effect } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TuiDialogService, TuiButton } from '@taiga-ui/core';
@@ -30,6 +30,16 @@ export class AppHeaderComponent {
   readonly passwordInput = signal<string>('');
   readonly confirmPasswordInput = signal<string>('');
 
+  constructor() {
+    effect(() => {
+      const initialized = this.authService.isAuthInitialized();
+      const user = this.authService.currentUser();
+      if (initialized && !user) {
+        this.authModalMode.set('login');
+      }
+    });
+  }
+
   toggleMenu(event?: Event): void {
     event?.stopPropagation();
     this.isMenuOpen.update((v) => !v);
@@ -49,6 +59,11 @@ export class AppHeaderComponent {
   }
 
   closeAuthModal(): void {
+    if (!this.authService.currentUser()) {
+      // If user is not authenticated, default page remains login mode
+      this.authModalMode.set('login');
+      return;
+    }
     this.authModalMode.set(null);
   }
 

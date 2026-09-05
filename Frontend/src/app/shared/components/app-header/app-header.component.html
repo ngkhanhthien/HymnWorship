@@ -99,7 +99,9 @@
         <span class="auth-header-icon">{{ mode === 'login' ? '🔑' : '👤' }}</span>
         <h3 class="auth-title">{{ mode === 'login' ? 'Sign in to Hymn Worship' : 'Create New Account' }}</h3>
       </div>
-      <button type="button" class="auth-close-btn" (click)="closeAuthModal()" aria-label="Close">✖</button>
+      @if (authService.currentUser()) {
+        <button type="button" class="auth-close-btn" (click)="closeAuthModal()" aria-label="Close">✖</button>
+      }
     </div>
 
     <div class="auth-card-body">

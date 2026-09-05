@@ -67,6 +67,9 @@ export class FirebaseAuthService {
 
   private toastTimer: any = null;
 
+  /** Auth state initialization status */
+  readonly isAuthInitialized = signal<boolean>(false);
+
   constructor() {
     try {
       this.app = initializeApp(firebaseConfig);
@@ -85,9 +88,11 @@ export class FirebaseAuthService {
         } else {
           this.currentUser.set(null);
         }
+        this.isAuthInitialized.set(true);
       });
     } catch (e) {
       console.warn('Firebase Auth SDK initialization error:', e);
+      this.isAuthInitialized.set(true);
     }
   }
 
