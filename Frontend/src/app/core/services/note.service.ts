@@ -222,15 +222,6 @@ export class NoteService {
 
     let generatedId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'note-' + Date.now();
 
-    if (this.db && user) {
-      try {
-        const docRef = await addDoc(collection(this.db, 'notes'), notePayload);
-        generatedId = docRef.id;
-      } catch (err) {
-        console.warn('Failed to save note to Firestore, saving locally:', err);
-      }
-    }
-
     const newNote: Note = {
       id: generatedId,
       userId: userIdentifier,
@@ -239,7 +230,18 @@ export class NoteService {
       createdAt: createdAtIso,
     };
 
-    // Optimistically update local daysSignal state
+    if (this.db && user) {
+      try {
+        const docRef = await addDoc(collection(this.db, 'notes'), notePayload);
+        newNote.id = docRef.id;
+        // Real-time onSnapshot listener will update daysSignal automatically without duplicates
+        return newNote;
+      } catch (err) {
+        console.warn('Failed to save note to Firestore, saving locally:', err);
+      }
+    }
+
+    // Local fallback only if offline / not connected to Firestore
     const days = [...(this.daysSignal() || [])];
     const dayIndex = days.findIndex(
       (d: Day) => d && String(d.hymnNumber) === String(hymnNumber) && d.date === targetDate
@@ -277,6 +279,8 @@ export class NoteService {
     if (this.db && user) {
       try {
         await deleteDoc(doc(this.db, 'notes', noteId));
+        // Real-time onSnapshot listener will update daysSignal automatically
+        return;
       } catch (err) {
         console.warn('Failed to delete note from Firestore:', err);
       }
