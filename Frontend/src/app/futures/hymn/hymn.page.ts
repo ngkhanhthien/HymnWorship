@@ -59,7 +59,7 @@ export class HymnPageComponent {
       map((p: ParamMap): Hymn | null => {
         const number = p.get('number');
         const title = p.get('title');
-        return number && title ? { number, title } : null;
+        return number ? { number, title: title || '' } : null;
       })
     ),
     { initialValue: null }
@@ -100,7 +100,14 @@ export class HymnPageComponent {
         String(h.id) === String(rawHymn.number)
     );
 
-    return fullHymn ? { ...rawHymn, ...fullHymn } : rawHymn;
+    if (!fullHymn) return rawHymn;
+
+    const scriptures =
+      fullHymn.scriptures && fullHymn.scriptures.length > 0
+        ? fullHymn.scriptures
+        : rawHymn.scriptures ?? [];
+
+    return { ...rawHymn, ...fullHymn, scriptures };
   });
 
   /** Computed list of scriptures related to the current hymn */

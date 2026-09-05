@@ -71,8 +71,9 @@ export class HymnDataService {
   }
 
   private fetchLocalHymns(): Observable<Hymn[]> {
-    return this.http.get<any[]>('/assets/hymns/hymns.json').pipe(
-      map((items: any[]): Hymn[] => items.map((item) => this.mapRawItemToHymn(item))),
+    return this.http.get<any[]>('/assets/data/hymns.json').pipe(
+      catchError(() => this.http.get<any[]>('/assets/hymns/hymns.json')),
+      map((items: any[]): Hymn[] => (Array.isArray(items) ? items.map((item) => this.mapRawItemToHymn(item)) : [])),
       catchError((error) => {
         console.error('Error fetching local hymns.json:', error);
         return of([]);
