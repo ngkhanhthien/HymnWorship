@@ -108,7 +108,15 @@ export class HymnPageComponent {
   readonly sheetMusicUrl = computed<string>(() => {
     const hymn = this.displayHymn();
     const hymnId = hymn.number || hymn.id || '1';
-    return `/assets/hymns/sheet_music/${hymnId}.png`;
+
+    if (hymn.sheet_music_urls && hymn.sheet_music_urls.length > 0 && hymn.sheet_music_urls[0].startsWith('http')) {
+      return hymn.sheet_music_urls[0];
+    }
+    if (hymn.sheet_music && hymn.sheet_music.length > 0 && hymn.sheet_music[0].startsWith('http')) {
+      return hymn.sheet_music[0];
+    }
+
+    return `https://storage.googleapis.com/qthymns1.firebasestorage.app/sheet_music/${hymnId}.png`;
   });
 
   /** Computed list of notes attached to currently displayed hymn */
