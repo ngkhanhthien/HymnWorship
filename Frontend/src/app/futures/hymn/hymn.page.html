@@ -179,4 +179,15 @@
       </div>
     </div>
   }
+
+  <!-- Delete Note Confirmation Modal -->
+  <app-confirm-modal
+    [isOpen]="!!noteIdToDelete()"
+    title="Xác nhận xóa ghi chú"
+    message="Bạn có chắc chắn muốn xóa ghi chú này không? Thao tác này không thể hoàn tác."
+    confirmText="Xóa (Enter)"
+    cancelText="Hủy (Esc)"
+    (confirm)="confirmDeleteNote()"
+    (cancel)="cancelDeleteNote()"
+  />
 </div>

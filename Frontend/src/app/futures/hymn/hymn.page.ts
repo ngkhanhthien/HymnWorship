@@ -7,6 +7,7 @@ import { HymnDataService } from '../../core/services/hymn-data.service';
 import { HymnPlayerService } from '../../shared/services/hymn-player.service';
 import { ScheduleService } from '../../core/services/schedule.service';
 import { HymnItemComponent } from '../../shared/components/hymn-items/hymn-item.component';
+import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal.component';
 import { Hymn, ScriptureRef } from '../../core/models/hymn';
 import { NoteTopic, Note } from '../../core/models/note';
 import { NoteService } from '../../core/services/note.service';
@@ -15,7 +16,7 @@ import { formatDateKey } from '../../core/utils/random.util';
 @Component({
   selector: 'app-hymn',
   standalone: true,
-  imports: [RouterModule, FormsModule, HymnItemComponent],
+  imports: [RouterModule, FormsModule, HymnItemComponent, ConfirmModalComponent],
   templateUrl: './hymn.page.html',
   styleUrl: './hymn.page.css',
 })
@@ -25,6 +26,9 @@ export class HymnPageComponent {
   private readonly scheduleService = inject(ScheduleService);
   private readonly noteService = inject(NoteService);
   private readonly hymnDataService = inject(HymnDataService);
+
+  /** Track note ID pending deletion confirmation */
+  readonly noteIdToDelete = signal<string | null>(null);
 
   /** Sequential main hymn + 3 suggestions for selected date */
   readonly selectedDayHymns = this.scheduleService.selectedDayHymns;
@@ -159,7 +163,19 @@ export class HymnPageComponent {
   }
 
   onDeleteNote(noteId: string): void {
-    this.noteService.deleteNote(noteId);
+    this.noteIdToDelete.set(noteId);
+  }
+
+  confirmDeleteNote(): void {
+    const id = this.noteIdToDelete();
+    if (id) {
+      this.noteService.deleteNote(id);
+    }
+    this.noteIdToDelete.set(null);
+  }
+
+  cancelDeleteNote(): void {
+    this.noteIdToDelete.set(null);
   }
 
   selectScripture(scripture: ScriptureRef): void {

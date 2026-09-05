@@ -1,0 +1,31 @@
+@if (isOpen) {
+  <div class="confirm-modal-overlay" (click)="onCancel()" role="dialog" aria-modal="true">
+    <div class="confirm-modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-icon-wrapper">
+        <span class="warning-icon">🗑️</span>
+      </div>
+      
+      <h3 class="modal-title">{{ title }}</h3>
+      <p class="modal-message">{{ message }}</p>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="modal-btn btn-cancel"
+          (click)="onCancel()"
+        >
+          {{ cancelText }}
+        </button>
+
+        <button
+          #confirmBtn
+          type="button"
+          class="modal-btn btn-confirm"
+          (click)="onConfirm()"
+        >
+          {{ confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
