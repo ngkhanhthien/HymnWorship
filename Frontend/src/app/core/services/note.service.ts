@@ -38,9 +38,18 @@ export class NoteService {
 
   constructor() {
     try {
-      this.db = getFirestore();
+      const app = this.authService.getApp();
+      if (app) {
+        this.db = getFirestore(app, 'qthymns1');
+      } else {
+        this.db = getFirestore();
+      }
     } catch (err) {
-      console.warn('Firestore initialization fallback:', err);
+      try {
+        this.db = getFirestore();
+      } catch (e) {
+        console.warn('Firestore initialization fallback:', e);
+      }
     }
 
     // Monitor active user state and load user-specific notes from Firestore or localStorage fallback

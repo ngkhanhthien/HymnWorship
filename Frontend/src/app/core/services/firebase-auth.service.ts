@@ -57,6 +57,10 @@ export class FirebaseAuthService {
   /** Real-time Firebase active user state */
   readonly currentUser = signal<ActiveUser | null>(null);
 
+  getApp(): any {
+    return this.app;
+  }
+
   /** Toast notification signal for English alerts */
   readonly toastNotification = signal<{ message: string; type: 'success' | 'error' } | null>(null);
 
