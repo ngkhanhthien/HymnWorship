@@ -21,6 +21,9 @@ export class SettingsComponent {
   /** Inline notification for unsupported local data source selection */
   readonly localAttemptMessage = signal<string | null>(null);
 
+  /** Inline notification for unsupported color theme selection */
+  readonly themeAttemptMessage = signal<string | null>(null);
+
   onDataSourceChange(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     if (!selectElement) return;
@@ -41,15 +44,25 @@ export class SettingsComponent {
 
   onThemeModeChange(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
-    if (selectElement) {
-      this.settingsService.setThemeMode(selectElement.value as ThemeMode);
+    if (!selectElement) return;
+
+    const selectedValue = selectElement.value as ThemeMode;
+
+    if (selectedValue !== 'current') {
+      const msg = 'Color Theme customization feature is currently not supported by the application.';
+      this.authService.showToast(msg, 'error');
+      this.themeAttemptMessage.set(msg);
+      selectElement.value = 'current';
+      this.settingsService.setThemeMode('current');
+    } else {
+      this.themeAttemptMessage.set(null);
+      this.settingsService.setThemeMode(selectedValue);
     }
   }
 
   onCustomColorChange(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    if (inputElement) {
-      this.settingsService.setCustomColor(inputElement.value);
-    }
+    const msg = 'Color Theme customization feature is currently not supported by the application.';
+    this.authService.showToast(msg, 'error');
+    this.themeAttemptMessage.set(msg);
   }
 }
