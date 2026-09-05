@@ -29,6 +29,7 @@ const firebaseConfig = {
 };
 
 export interface ActiveUser {
+  uid: string;
   displayName: string;
   email: string;
   photoURL?: string;
@@ -81,6 +82,7 @@ export class FirebaseAuthService {
         if (user) {
           const name = user.displayName || user.email?.split('@')[0] || 'User';
           this.currentUser.set({
+            uid: user.uid,
             displayName: name,
             email: name,
             photoURL: user.photoURL || undefined,
@@ -113,7 +115,7 @@ export class FirebaseAuthService {
       const fbPass = toFirebasePassword(pass);
       const res = await signInWithEmailAndPassword(this.auth, fbEmail, fbPass);
       const name = res.user.displayName || account;
-      this.currentUser.set({ displayName: name, email: name });
+      this.currentUser.set({ uid: res.user.uid, displayName: name, email: name });
       this.showToast(`Successfully signed in as ${name}!`, 'success');
       this.isLoading.set(false);
       return true;
@@ -148,7 +150,7 @@ export class FirebaseAuthService {
         // profile update optional fallback
       }
       const name = account;
-      this.currentUser.set({ displayName: name, email: name });
+      this.currentUser.set({ uid: res.user.uid, displayName: name, email: name });
       this.showToast(`Account created successfully! Welcome ${name}.`, 'success');
       this.isLoading.set(false);
       return true;
@@ -176,7 +178,7 @@ export class FirebaseAuthService {
     try {
       const res = await signInWithPopup(this.auth, this.googleProvider);
       const name = res.user.displayName || res.user.email || 'Google User';
-      this.currentUser.set({ displayName: name, email: res.user.email || 'user@google.com' });
+      this.currentUser.set({ uid: res.user.uid, displayName: name, email: res.user.email || 'user@google.com' });
       this.showToast(`Successfully signed in with Google as ${name}!`, 'success');
       this.isLoading.set(false);
       return true;
@@ -204,7 +206,7 @@ export class FirebaseAuthService {
     try {
       const res = await signInWithPopup(this.auth, this.facebookProvider);
       const name = res.user.displayName || res.user.email || 'Facebook User';
-      this.currentUser.set({ displayName: name, email: res.user.email || 'user@facebook.com' });
+      this.currentUser.set({ uid: res.user.uid, displayName: name, email: res.user.email || 'user@facebook.com' });
       this.showToast(`Successfully signed in with Facebook as ${name}!`, 'success');
       this.isLoading.set(false);
       return true;

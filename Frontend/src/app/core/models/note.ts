@@ -5,7 +5,8 @@ export enum NoteTopic {
 }
 
 export interface Note {
-  id: string; // UUID string
+  id: string; // UUID string or Firestore document ID
+  userId?: string; // Owner user ID or account name
   topic: NoteTopic; // Enum restricted to 'MIT' | 'Promptings' | 'Gratitude'
   content: string;
   createdAt?: string; // Optional ISO timestamp string
@@ -13,6 +14,7 @@ export interface Note {
 
 export interface Day {
   id: string; // UUID string
+  userId?: string;
   hymnNumber: number; // Hymn number assigned to this day
   date: string; // Unique date string ('YYYY-MM-DD' or ISO timestamp)
   notes: Note[]; // Array of notes created for this day
