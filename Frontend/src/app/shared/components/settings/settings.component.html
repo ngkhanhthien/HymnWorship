@@ -15,6 +15,13 @@
         </option>
       }
     </select>
+
+    @if (localAttemptMessage(); as warningMsg) {
+      <div class="unsupported-alert">
+        <span>⚠️ {{ warningMsg }}</span>
+      </div>
+    }
+
     <p class="setting-description">
       @for (option of settingsService.dataSourceOptions; track option.value) {
         @if (option.value === settingsService.dataSource()) {

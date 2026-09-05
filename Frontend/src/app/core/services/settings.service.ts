@@ -14,21 +14,26 @@ export interface DataSourceOption {
 export class SettingsService {
   readonly dataSourceOptions: readonly DataSourceOption[] = [
     {
-      value: 'local',
-      label: 'Local (Use local JSON & media files)',
-      description: 'Fetch hymn data, sheet music, and audio directly from local project assets.',
+      value: 'firebase',
+      label: 'Firebase (Firestore & Cloud Storage) [Default]',
+      description: 'Fetch hymn metadata from Firestore and stream media from Firebase Storage.',
     },
     {
-      value: 'firebase',
-      label: 'Firebase (Use Firestore & Cloud Storage)',
-      description: 'Fetch hymn metadata from Firestore and stream media from Firebase Storage.',
+      value: 'local',
+      label: 'Local (Unsupported)',
+      description: 'Local project data source is currently not supported.',
     },
   ];
 
   /** Selected data source mode, default is 'firebase' */
   readonly dataSource = signal<DataSourceMode>('firebase');
 
-  setDataSource(mode: DataSourceMode): void {
+  setDataSource(mode: DataSourceMode): boolean {
+    if (mode === 'local') {
+      this.dataSource.set('firebase');
+      return false;
+    }
     this.dataSource.set(mode);
+    return true;
   }
 }
