@@ -85,10 +85,10 @@ export class NoteService {
 
       this.unsubscribeSnapshot = onSnapshot(
         q,
-        (snapshot) => {
+        (snapshot: any) => {
           const daysMap = new Map<string, Day>();
 
-          snapshot.forEach((docSnap) => {
+          snapshot.forEach((docSnap: any) => {
             const data = docSnap.data();
             const noteId = docSnap.id;
             const hymnNum = data['hymnNumber'] ?? 0;
@@ -118,7 +118,7 @@ export class NoteService {
           this.daysSignal.set(daysArray);
           this.saveToStorage(userIdentifier, daysArray);
         },
-        (error) => {
+        (error: any) => {
           console.warn('Firestore subscription error, using local fallback:', error);
           this.daysSignal.set(this.loadFromStorage(userIdentifier));
         }
@@ -193,7 +193,7 @@ export class NoteService {
     if (!Array.isArray(days)) return [];
 
     const foundDay = days.find(
-      (d) => d && String(d.hymnNumber) === String(hymnNumber) && d.date === targetDate
+      (d: Day) => d && String(d.hymnNumber) === String(hymnNumber) && d.date === targetDate
     );
     return foundDay && Array.isArray(foundDay.notes) ? foundDay.notes : [];
   }
@@ -242,7 +242,7 @@ export class NoteService {
     // Optimistically update local daysSignal state
     const days = [...(this.daysSignal() || [])];
     const dayIndex = days.findIndex(
-      (d) => d && String(d.hymnNumber) === String(hymnNumber) && d.date === targetDate
+      (d: Day) => d && String(d.hymnNumber) === String(hymnNumber) && d.date === targetDate
     );
 
     if (dayIndex >= 0) {
@@ -283,9 +283,9 @@ export class NoteService {
     }
 
     const currentDays = this.daysSignal() || [];
-    const updatedDays = currentDays.map((d) => ({
+    const updatedDays = currentDays.map((d: Day) => ({
       ...d,
-      notes: Array.isArray(d.notes) ? d.notes.filter((n) => n && n.id !== noteId) : [],
+      notes: Array.isArray(d.notes) ? d.notes.filter((n: Note) => n && n.id !== noteId) : [],
     }));
     this.daysSignal.set(updatedDays);
     this.saveToStorage(userIdentifier, updatedDays);
