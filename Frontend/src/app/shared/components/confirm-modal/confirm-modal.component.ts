@@ -20,10 +20,10 @@ import { CommonModule } from '@angular/common';
 })
 export class ConfirmModalComponent implements OnChanges {
   @Input() isOpen = false;
-  @Input() title = 'Xác nhận xóa';
-  @Input() message = 'Bạn có chắc chắn muốn xóa ghi chú này không?';
-  @Input() confirmText = 'Xóa (Enter)';
-  @Input() cancelText = 'Hủy (Esc)';
+  @Input() title = 'Confirm Deletion';
+  @Input() message = 'Are you sure you want to delete this note?';
+  @Input() confirmText = 'Delete (Enter)';
+  @Input() cancelText = 'Cancel (Esc)';
 
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();

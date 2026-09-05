@@ -16,10 +16,10 @@
 
   <app-confirm-modal
     [isOpen]="!!noteIdToDelete()"
-    title="Xác nhận xóa ghi chú"
-    message="Bạn có chắc chắn muốn xóa ghi chú này không? Thao tác này không thể hoàn tác."
-    confirmText="Xóa (Enter)"
-    cancelText="Hủy (Esc)"
+    title="Confirm Note Deletion"
+    message="Are you sure you want to delete this note? This action cannot be undone."
+    confirmText="Delete (Enter)"
+    cancelText="Cancel (Esc)"
     (confirm)="confirmDeleteNote()"
     (cancel)="cancelDeleteNote()"
   />
