@@ -9,6 +9,7 @@ import {
   FacebookAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  updateProfile,
   User,
 } from 'firebase/auth';
 
@@ -18,17 +19,31 @@ import {
  * Firebase Console -> Project Settings -> General -> Web API Key.
  */
 const firebaseConfig = {
-  apiKey: 'AIzaSy_Paste_Your_Firebase_Web_API_Key_Here',
+  apiKey: 'AIzaSyDkENfMEb1ipgnZ6yFGaHEbesU7MrwEKe8',
   authDomain: 'qthymns1.firebaseapp.com',
   projectId: 'qthymns1',
   storageBucket: 'qthymns1.firebasestorage.app',
-  messagingSenderId: '106939239974456258902',
+  messagingSenderId: '153253515262',
+  appId: '1:153253515262:web:6954edcec0743288a0baaf',
+  measurementId: 'G-1FSBHPHD2B',
 };
 
 export interface ActiveUser {
   displayName: string;
   email: string;
   photoURL?: string;
+}
+
+/** Maps any account string (e.g., 'abc') to a valid Firebase email syntax */
+function toFirebaseEmail(account: string): string {
+  const sanitized = account.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '');
+  return `${sanitized || 'user'}@hymnworship.local`;
+}
+
+/** Pads short passwords (e.g., '1') to satisfy Firebase Auth >= 6 char requirement */
+function toFirebasePassword(password: string): string {
+  if (password.length >= 6) return password;
+  return `${password}_secure_padding`;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -61,9 +76,10 @@ export class FirebaseAuthService {
 
       onAuthStateChanged(this.auth, (user: User | null) => {
         if (user) {
+          const name = user.displayName || user.email?.split('@')[0] || 'User';
           this.currentUser.set({
-            displayName: user.displayName || user.email || 'User',
-            email: user.email || '',
+            displayName: name,
+            email: name,
             photoURL: user.photoURL || undefined,
           });
         } else {
@@ -75,7 +91,7 @@ export class FirebaseAuthService {
     }
   }
 
-  async signInWithEmail(email: string, pass: string): Promise<boolean> {
+  async signInWithEmail(account: string, pass: string): Promise<boolean> {
     this.isLoading.set(true);
     this.authError.set(null);
 
@@ -88,9 +104,11 @@ export class FirebaseAuthService {
     }
 
     try {
-      const res = await signInWithEmailAndPassword(this.auth, email, pass);
-      const name = res.user.displayName || res.user.email || 'User';
-      this.currentUser.set({ displayName: name, email: res.user.email || email });
+      const fbEmail = toFirebaseEmail(account);
+      const fbPass = toFirebasePassword(pass);
+      const res = await signInWithEmailAndPassword(this.auth, fbEmail, fbPass);
+      const name = res.user.displayName || account;
+      this.currentUser.set({ displayName: name, email: name });
       this.showToast(`Successfully signed in as ${name}!`, 'success');
       this.isLoading.set(false);
       return true;
@@ -103,7 +121,7 @@ export class FirebaseAuthService {
     }
   }
 
-  async signUpWithEmail(email: string, pass: string): Promise<boolean> {
+  async signUpWithEmail(account: string, pass: string): Promise<boolean> {
     this.isLoading.set(true);
     this.authError.set(null);
 
@@ -116,9 +134,16 @@ export class FirebaseAuthService {
     }
 
     try {
-      const res = await createUserWithEmailAndPassword(this.auth, email, pass);
-      const name = res.user.displayName || res.user.email || 'User';
-      this.currentUser.set({ displayName: name, email: res.user.email || email });
+      const fbEmail = toFirebaseEmail(account);
+      const fbPass = toFirebasePassword(pass);
+      const res = await createUserWithEmailAndPassword(this.auth, fbEmail, fbPass);
+      try {
+        await updateProfile(res.user, { displayName: account });
+      } catch (e) {
+        // profile update optional fallback
+      }
+      const name = account;
+      this.currentUser.set({ displayName: name, email: name });
       this.showToast(`Account created successfully! Welcome ${name}.`, 'success');
       this.isLoading.set(false);
       return true;
@@ -216,12 +241,12 @@ export class FirebaseAuthService {
     if (code === 'auth/invalid-api-key' || code === 'auth/api-key-not-valid' || msg.includes('api-key-not-valid')) {
       return 'Firebase Web API Key is invalid or missing. Please add your Web API Key from Firebase Console (Project Settings) to firebase-auth.service.ts.';
     }
-    if (code === 'auth/invalid-email') return 'Invalid email address format.';
+    if (code === 'auth/invalid-email') return 'Invalid account format.';
     if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-      return 'Incorrect email or password.';
+      return 'Incorrect account name or password.';
     }
-    if (code === 'auth/email-already-in-use') return 'This email is already registered. Please sign in instead.';
-    if (code === 'auth/weak-password') return 'Password should be at least 6 characters.';
+    if (code === 'auth/email-already-in-use') return 'This account name is already registered. Please sign in instead.';
+    if (code === 'auth/weak-password') return 'Password is too weak.';
     if (code === 'auth/popup-closed-by-user') return 'Sign-in popup was closed before completion.';
     if (code === 'auth/operation-not-allowed') return 'This auth provider is not enabled in Firebase Console.';
     return err?.message || 'Authentication failed. Please try again.';

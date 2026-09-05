@@ -99,15 +99,15 @@
         </div>
       }
 
-      <!-- Email / Username Input -->
+      <!-- Account Name Input -->
       <div class="auth-form-field">
-        <label class="form-label">Email address</label>
+        <label class="form-label">Account Name</label>
         <div class="input-icon-wrapper">
-          <span class="input-icon">📧</span>
+          <span class="input-icon">👤</span>
           <input
-            type="email"
+            type="text"
             class="form-input"
-            placeholder="name@example.com"
+            placeholder="Enter account name (e.g. abc)..."
             [ngModel]="emailInput()"
             (ngModelChange)="emailInput.set($event)"
             (keyup.enter)="onSubmitAuth()"
@@ -123,7 +123,7 @@
           <input
             type="password"
             class="form-input"
-            placeholder="Enter password..."
+            placeholder="Enter password (e.g. 1)..."
             [ngModel]="passwordInput()"
             (ngModelChange)="passwordInput.set($event)"
             (keyup.enter)="onSubmitAuth()"

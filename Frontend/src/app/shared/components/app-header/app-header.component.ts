@@ -65,16 +65,10 @@ export class AppHeaderComponent {
   async onSubmitAuth(): Promise<void> {
     const email = this.emailInput().trim();
     const pass = this.passwordInput();
-    const confirm = this.confirmPasswordInput();
     const mode = this.authModalMode();
 
     if (!email || !pass) {
-      this.authService.authError.set('Please enter both email and password.');
-      return;
-    }
-
-    if (mode === 'register' && pass !== confirm) {
-      this.authService.authError.set('Passwords do not match.');
+      this.authService.authError.set('Please enter both account name and password.');
       return;
     }
 
