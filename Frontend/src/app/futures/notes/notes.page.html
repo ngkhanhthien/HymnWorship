@@ -23,4 +23,76 @@
     (confirm)="confirmDeleteNote()"
     (cancel)="cancelDeleteNote()"
   />
+
+  <!-- Edit Note Modal Dialog -->
+  @if (editingNote(); as targetNote) {
+    <div class="edit-modal-overlay" (click)="closeEditModal()"></div>
+    <div class="edit-modal-card">
+      <div class="edit-modal-header">
+        <div class="modal-title-group">
+          <span class="modal-header-icon">✏️</span>
+          <h3 class="modal-title">Edit Sacred Note</h3>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeEditModal()" aria-label="Close">✖</button>
+      </div>
+
+      <div class="edit-modal-body">
+        <div class="hymn-info-badge">
+          <span>Hymn #{{ targetNote.hymnNumber }}</span>
+          <span class="badge-dot">•</span>
+          <span>Date: {{ targetNote.date }}</span>
+        </div>
+
+        <div class="edit-form-field">
+          <label class="form-label" for="editTopicSelect">Topic</label>
+          <select
+            id="editTopicSelect"
+            class="form-select"
+            [ngModel]="editTopic()"
+            (ngModelChange)="editTopic.set($event)"
+          >
+            @for (t of topics; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="edit-form-field">
+          <label class="form-label" for="editContentInput">Note Content</label>
+          <textarea
+            id="editContentInput"
+            class="form-textarea"
+            rows="4"
+            placeholder="Type your updated note content here..."
+            [ngModel]="editContent()"
+            (ngModelChange)="editContent.set($event)"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="edit-modal-footer">
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="isSavingNote()"
+          (click)="closeEditModal()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn-save"
+          [disabled]="isSavingNote() || !editContent().trim()"
+          (click)="saveEditedNote()"
+        >
+          @if (isSavingNote()) {
+            <span class="btn-spinner"></span>
+            <span>Saving...</span>
+          } @else {
+            <span>Save Changes</span>
+          }
+        </button>
+      </div>
+    </div>
+  }
 </div>

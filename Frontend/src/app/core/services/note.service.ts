@@ -8,6 +8,7 @@ import {
   query,
   where,
   addDoc,
+  updateDoc,
   deleteDoc,
   doc,
   onSnapshot,
@@ -293,5 +294,50 @@ export class NoteService {
     }));
     this.daysSignal.set(updatedDays);
     this.saveToStorage(userIdentifier, updatedDays);
+  }
+
+  /** Update an existing note's topic and content in Firestore & local state */
+  async updateNote(
+    noteId: string,
+    topic: NoteTopic,
+    content: string
+  ): Promise<boolean> {
+    if (!noteId) return false;
+
+    const user = this.authService.currentUser();
+    const userIdentifier = user?.uid || user?.displayName || user?.email || 'guest';
+    const trimmedContent = (content || '').trim();
+    const updatedAtIso = new Date().toISOString();
+
+    if (this.db && user) {
+      try {
+        const noteRef = doc(this.db, 'notes', noteId);
+        await updateDoc(noteRef, {
+          topic: topic || NoteTopic.MIT,
+          content: trimmedContent,
+          updatedAt: updatedAtIso,
+        });
+        return true;
+      } catch (err) {
+        console.warn('Failed to update note in Firestore, updating locally:', err);
+      }
+    }
+
+    // Local fallback if offline or guest
+    const currentDays = [...(this.daysSignal() || [])];
+    const updatedDays = currentDays.map((day: Day) => ({
+      ...day,
+      notes: Array.isArray(day.notes)
+        ? day.notes.map((note: Note) =>
+            note.id === noteId
+              ? { ...note, topic: topic || NoteTopic.MIT, content: trimmedContent, updatedAt: updatedAtIso }
+              : note
+          )
+        : [],
+    }));
+
+    this.daysSignal.set(updatedDays);
+    this.saveToStorage(userIdentifier, updatedDays);
+    return true;
   }
 }
