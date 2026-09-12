@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
@@ -12,6 +12,7 @@ import {
   updateProfile,
   User,
 } from 'firebase/auth';
+import { HymnPlayerService } from '../../shared/services/hymn-player.service';
 
 /**
  * Firebase Project qthymns1 Web Configuration.
@@ -49,6 +50,7 @@ function toFirebasePassword(password: string): string {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthService {
+  private readonly playerService = inject(HymnPlayerService);
   private app: any = null;
   private auth: any = null;
   private googleProvider: any = null;
@@ -93,6 +95,7 @@ export class FirebaseAuthService {
           });
         } else {
           this.currentUser.set(null);
+          this.playerService.stop();
         }
         this.isAuthInitialized.set(true);
       });
@@ -224,6 +227,7 @@ export class FirebaseAuthService {
   }
 
   async signOutUser(): Promise<void> {
+    this.playerService.stop();
     try {
       if (this.auth) {
         await firebaseSignOut(this.auth);
