@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, map, catchError, shareReplay } from 'rxjs';
 import { Hymn } from '../models/hymn';
-import { SettingsService } from './settings.service';
 
 const FIREBASE_HYMNS_URL =
   'https://storage.googleapis.com/qthymns1.firebasestorage.app/data/hymns.json';
@@ -12,25 +11,12 @@ const FIREBASE_HYMNS_URL =
 })
 export class HymnDataService {
   private readonly http = inject(HttpClient);
-  private readonly settingsService = inject(SettingsService);
-  private cachedLocalHymns$: Observable<Hymn[]> | null = null;
   private cachedFirebaseHymns$: Observable<Hymn[]> | null = null;
 
   /**
-   * Unified data fetcher respecting SettingsService.dataSource() mode.
-   * Default mode is 'firebase'.
+   * Unified data fetcher for hymns (Firebase Cloud Storage with local fallback).
    */
   getHymns(): Observable<Hymn[]> {
-    const mode = this.settingsService.dataSource();
-
-    if (mode === 'local') {
-      if (!this.cachedLocalHymns$) {
-        this.cachedLocalHymns$ = this.fetchLocalHymns().pipe(shareReplay(1));
-      }
-      return this.cachedLocalHymns$;
-    }
-
-    // Default mode: Firebase
     if (!this.cachedFirebaseHymns$) {
       this.cachedFirebaseHymns$ = this.fetchFirebaseHymns().pipe(shareReplay(1));
     }

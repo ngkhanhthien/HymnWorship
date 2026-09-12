@@ -1,23 +1,18 @@
-import { Component, inject, ViewChild, TemplateRef, signal, effect } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { TuiDialogService, TuiButton } from '@taiga-ui/core';
-import { SettingsComponent, SETTINGS_TITLE } from '../settings/settings.component';
+import { TuiButton } from '@taiga-ui/core';
 import { FirebaseAuthService } from '../../../core/services/firebase-auth.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, FormsModule, TuiButton, SettingsComponent],
+  imports: [RouterLink, RouterLinkActive, FormsModule, TuiButton],
   templateUrl: './app-header.component.html',
   styleUrl: './app-header.component.css',
 })
 export class AppHeaderComponent {
-  private readonly dialogs = inject(TuiDialogService);
   protected readonly authService = inject(FirebaseAuthService);
-
-  @ViewChild('settingsDialog')
-  private readonly settingsDialogTemplate!: TemplateRef<any>;
 
   /** Gear dropdown menu open state */
   readonly isMenuOpen = signal<boolean>(false);
@@ -72,11 +67,6 @@ export class AppHeaderComponent {
     this.authModalMode.set(mode);
   }
 
-  onSelectSettings(): void {
-    this.closeMenu();
-    this.openSettings();
-  }
-
   async onSubmitAuth(): Promise<void> {
     const email = this.emailInput().trim();
     const pass = this.passwordInput();
@@ -115,11 +105,5 @@ export class AppHeaderComponent {
   async onSignOut(): Promise<void> {
     this.closeMenu();
     await this.authService.signOutUser();
-  }
-
-  openSettings(): void {
-    if (this.settingsDialogTemplate) {
-      this.dialogs.open(this.settingsDialogTemplate, { label: SETTINGS_TITLE }).subscribe();
-    }
   }
 }
