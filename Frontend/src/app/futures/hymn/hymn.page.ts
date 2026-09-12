@@ -156,29 +156,45 @@ export class HymnPageComponent {
     }
   }
 
-  onAddNote(): void {
+  /** Track note creation loading state */
+  readonly isSubmittingNote = signal<boolean>(false);
+
+  /** Track note deletion loading state */
+  readonly isDeletingNote = signal<boolean>(false);
+
+  async onAddNote(): Promise<void> {
     const content = this.noteContent().trim();
-    if (!content) return;
+    if (!content || this.isSubmittingNote()) return;
 
-    this.noteService.addNote(
-      this.displayHymn().number,
-      this.selectedTopic(),
-      content
-    );
-
-    this.noteContent.set('');
+    this.isSubmittingNote.set(true);
+    try {
+      await this.noteService.addNote(
+        this.displayHymn().number,
+        this.selectedTopic(),
+        content
+      );
+      this.noteContent.set('');
+    } finally {
+      this.isSubmittingNote.set(false);
+    }
   }
 
   onDeleteNote(noteId: string): void {
+    if (this.isDeletingNote()) return;
     this.noteIdToDelete.set(noteId);
   }
 
-  confirmDeleteNote(): void {
+  async confirmDeleteNote(): Promise<void> {
     const id = this.noteIdToDelete();
-    if (id) {
-      this.noteService.deleteNote(id);
+    if (id && !this.isDeletingNote()) {
+      this.isDeletingNote.set(true);
+      try {
+        await this.noteService.deleteNote(id);
+      } finally {
+        this.isDeletingNote.set(false);
+        this.noteIdToDelete.set(null);
+      }
     }
-    this.noteIdToDelete.set(null);
   }
 
   cancelDeleteNote(): void {
