@@ -38,28 +38,22 @@
   min-width: 300px;
 }
 
-.tab-bar {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.tab-btn {
-  padding: 8px 18px;
-  border: 2px solid #c0392b;
-  background: transparent;
-  color: #1a3a5c;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.2s, color 0.2s;
-}
-
-.tab-btn.active {
+.panel-title-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
   background: #1a3a5c;
-  color: #fff;
-  border-color: #1a3a5c;
+  color: #ffffff;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(26, 58, 92, 0.15);
+}
+
+.badge-icon {
+  font-size: 16px;
 }
 
 .tab-body {
@@ -90,28 +84,6 @@
   object-fit: contain;
   border-radius: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.lyrics-wrapper {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 36px;
-}
-
-.hymn-now-label {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a3a5c;
-  margin: 0;
-}
-
-.coming-soon-label {
-  font-size: 15px;
-  color: #888;
-  font-style: italic;
-  margin: 0;
 }
 
 /* ── Right Panel (Devotional & Notes Panel) ── */

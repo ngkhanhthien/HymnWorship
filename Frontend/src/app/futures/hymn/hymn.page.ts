@@ -42,9 +42,6 @@ export class HymnPageComponent {
   /** All hymns signal for looking up rich metadata (scriptures, audio, sheet music) */
   readonly allHymns = toSignal(this.hymnDataService.getHymns());
 
-  /** Active Tab signal ('pdf' or 'lyrics'), default is 'pdf' */
-  readonly activeTab = signal<'pdf' | 'lyrics'>('pdf');
-
   /** Currently selected scripture for right-side drawer view */
   readonly selectedScripture = signal<ScriptureRef | null>(null);
 
@@ -183,10 +180,6 @@ export class HymnPageComponent {
       return timeB - timeA;
     });
   });
-
-  selectTab(tab: 'pdf' | 'lyrics'): void {
-    this.activeTab.set(tab);
-  }
 
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;

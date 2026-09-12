@@ -1,24 +1,10 @@
 <div class="hymn-layout">
-  <!-- Left: Content Panel (Sheet Music & Lyrics) -->
+  <!-- Left: Content Panel (Sheet Music) -->
   <section class="hymn-content-panel">
     <div class="panel-header-row">
-      <div class="tab-bar">
-        <button
-          type="button"
-          class="tab-btn"
-          [class.active]="activeTab() === 'pdf'"
-          (click)="selectTab('pdf')"
-        >
-          PDF Sheet Music
-        </button>
-        <button
-          type="button"
-          class="tab-btn"
-          [class.active]="activeTab() === 'lyrics'"
-          (click)="selectTab('lyrics')"
-        >
-          Lyrics and Video
-        </button>
+      <div class="panel-title-badge">
+        <span class="badge-icon">🎼</span>
+        <span class="badge-text">PDF Sheet Music</span>
       </div>
       <!-- Hymn item positioned at top right of the left column -->
       <div class="top-right-hymn">
@@ -31,20 +17,14 @@
     </div>
 
     <div class="tab-body">
-      @if (activeTab() === 'pdf') {
-        <div class="sheet-music-wrapper">
-          <img
-            [src]="sheetMusicUrl()"
-            [alt]="displayHymn().title + ' Sheet Music'"
-            class="sheet-music-img"
-            (error)="onImageError($event)"
-          />
-        </div>
-      } @else {
-        <div class="lyrics-wrapper">
-          <p class="coming-soon-label">Lyrics & Video Coming Soon</p>
-        </div>
-      }
+      <div class="sheet-music-wrapper">
+        <img
+          [src]="sheetMusicUrl()"
+          [alt]="displayHymn().title + ' Sheet Music'"
+          class="sheet-music-img"
+          (error)="onImageError($event)"
+        />
+      </div>
     </div>
   </section>
 
