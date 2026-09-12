@@ -14,7 +14,7 @@
             <span class="user-avatar-icon">👤</span>
             <span class="user-email-text">{{ user.displayName || user.email }}</span>
           </div>
-          <button type="button" class="header-signout-btn" (click)="onSignOut(true)" title="Sign Out & Switch Account">
+          <button type="button" class="header-signout-btn" (click)="onSignOut()" title="Sign Out">
             <span class="btn-icon">🚪</span>
             <span>Sign Out</span>
           </button>
@@ -57,11 +57,7 @@
               <span class="item-text">Settings</span>
             </button>
             @if (authService.currentUser()) {
-              <button type="button" class="dropdown-item" (click)="onSignOut(true)">
-                <span class="item-icon">🔄</span>
-                <span class="item-text">Switch Account</span>
-              </button>
-              <button type="button" class="dropdown-item signout-item" (click)="onSignOut(false)">
+              <button type="button" class="dropdown-item signout-item" (click)="onSignOut()">
                 <span class="item-icon">🚪</span>
                 <span class="item-text">Sign Out</span>
               </button>

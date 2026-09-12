@@ -112,12 +112,9 @@ export class AppHeaderComponent {
     }
   }
 
-  async onSignOut(reopenLogin: boolean = false): Promise<void> {
+  async onSignOut(): Promise<void> {
     this.closeMenu();
     await this.authService.signOutUser();
-    if (reopenLogin) {
-      this.openAuthModal('login');
-    }
   }
 
   openSettings(): void {
