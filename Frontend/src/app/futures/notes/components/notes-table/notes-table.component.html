@@ -2,18 +2,35 @@
   <table class="notes-table">
     <thead>
       <tr>
+        <th class="col-expand"></th>
         <th class="col-date">Created Date</th>
-        <th class="col-time">Created Time</th>
+        <th class="col-time">Time</th>
         <th class="col-hymn">Hymn #</th>
         <th class="col-topic">Topic</th>
-        <th class="col-content">Content</th>
+        <th class="col-content">Note Content</th>
         <th class="col-updated">Last Edited</th>
         <th class="col-actions">Actions</th>
       </tr>
     </thead>
     <tbody>
       @for (item of notes; track item.id) {
-        <tr class="table-row">
+        <tr
+          class="table-row"
+          [class.is-expanded]="isExpanded(item.id)"
+          (click)="toggleExpand(item.id)"
+          title="Click row to view full note details"
+        >
+          <td class="col-expand" (click)="$event.stopPropagation(); toggleExpand(item.id)">
+            <button
+              type="button"
+              class="expand-toggle-btn"
+              [class.active]="isExpanded(item.id)"
+              title="{{ isExpanded(item.id) ? 'Collapse details' : 'Expand full note' }}"
+              aria-label="Toggle details"
+            >
+              <span class="chevron-arrow">{{ isExpanded(item.id) ? '▲' : '▼' }}</span>
+            </button>
+          </td>
           <td class="col-date font-medium">{{ formatDate(item.date) }}</td>
           <td class="col-time muted-text">{{ formatTime(item.createdAt) }}</td>
           <td class="col-hymn">
@@ -24,9 +41,13 @@
               {{ item.topic }}
             </span>
           </td>
-          <td class="col-content">{{ item.content }}</td>
+          <td class="col-content">
+            <div class="content-preview">
+              <span class="preview-text">{{ getPreviewText(item.content) }}</span>
+            </div>
+          </td>
           <td class="col-updated edited-text">{{ formatLastEdited(item.updatedAt) }}</td>
-          <td class="col-actions">
+          <td class="col-actions" (click)="$event.stopPropagation()">
             <div class="action-buttons">
               <!-- Edit Icon Button -->
               <button
@@ -56,9 +77,37 @@
             </div>
           </td>
         </tr>
+
+        <!-- Expanded Full Details Card Row -->
+        @if (isExpanded(item.id)) {
+          <tr class="detail-row">
+            <td colspan="8">
+              <div class="expanded-card">
+                <div class="card-header">
+                  <div class="header-left">
+                    <span class="detail-badge topic" [attr.data-topic]="item.topic">🏷️ {{ item.topic }}</span>
+                    <span class="detail-badge hymn" [title]="'Hymn #' + item.hymnNumber + getHymnTitle(item.hymnNumber)">
+                      🎵 Hymn #{{ item.hymnNumber }}{{ getHymnTitle(item.hymnNumber) }}
+                    </span>
+                  </div>
+                  <div class="header-right">
+                    <span class="meta-item">📅 Created: <strong>{{ formatDate(item.date) }} {{ formatTime(item.createdAt) }}</strong></span>
+                    <span class="meta-separator">•</span>
+                    <span class="meta-item">📝 Last Edited: <strong>{{ formatLastEdited(item.updatedAt) }}</strong></span>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <h4 class="detail-section-title">FULL NOTE CONTENT:</h4>
+                  <div class="full-content-text">{{ item.content }}</div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        }
       } @empty {
         <tr>
-          <td colspan="7" class="empty-table-msg">
+          <td colspan="8" class="empty-table-msg">
             No notes recorded yet. Add your first sacred note from any Hymn page!
           </td>
         </tr>
