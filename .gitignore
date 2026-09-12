@@ -44,3 +44,4 @@ ENV/
 Thumbs.db
 .vscode/
 .idea/
+.angular/
