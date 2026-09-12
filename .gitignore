@@ -21,6 +21,7 @@ Frontend/public/assets/hymns/
 *.pptx
 *.pdf
 *PLAN*.md
+*BAOCAO*.md
 
 # Logs
 **/logs/

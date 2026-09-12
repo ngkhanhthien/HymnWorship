@@ -93,12 +93,15 @@ export class HymnPageComponent {
       this.playerService.currentPlaying() ??
       this.defaultTodayHymn();
 
+    const fastHymn = this.hymnDataService.getHymnFast(rawHymn.number);
     const hymnsList = (this.allHymns() ?? []) as Hymn[];
-    const fullHymn = hymnsList.find(
-      (h: Hymn) =>
-        String(h.number) === String(rawHymn.number) ||
-        String(h.id) === String(rawHymn.number)
-    );
+    const fullHymn =
+      fastHymn ??
+      hymnsList.find(
+        (h: Hymn) =>
+          String(h.number) === String(rawHymn.number) ||
+          String(h.id) === String(rawHymn.number)
+      );
 
     if (!fullHymn) return rawHymn;
 
@@ -115,20 +118,33 @@ export class HymnPageComponent {
     return this.displayHymn().scriptures ?? [];
   });
 
-  /** Computed URL for sheet music PNG image */
+  /** In-memory HTMLImageElement cache for zero-latency sheet music re-opening */
+  private readonly sheetMusicImageCache = new Map<string, HTMLImageElement>();
+
+  /** Computed URL for sheet music PNG image with automatic browser/memory pre-caching */
   readonly sheetMusicUrl = computed<string>(() => {
     const hymn = this.displayHymn();
     const hymnId = hymn.number || hymn.id || '1';
 
+    let targetUrl = `https://storage.googleapis.com/qthymns1.firebasestorage.app/sheet_music/${hymnId}.png`;
+
     if (hymn.sheet_music_urls && hymn.sheet_music_urls.length > 0 && hymn.sheet_music_urls[0].startsWith('http')) {
-      return hymn.sheet_music_urls[0];
-    }
-    if (hymn.sheet_music && hymn.sheet_music.length > 0 && hymn.sheet_music[0].startsWith('http')) {
-      return hymn.sheet_music[0];
+      targetUrl = hymn.sheet_music_urls[0];
+    } else if (hymn.sheet_music && hymn.sheet_music.length > 0 && hymn.sheet_music[0].startsWith('http')) {
+      targetUrl = hymn.sheet_music[0];
     }
 
-    return `https://storage.googleapis.com/qthymns1.firebasestorage.app/sheet_music/${hymnId}.png`;
+    // Preload image in memory cache for instant rendering when re-opening
+    this.preloadSheetMusicImage(targetUrl);
+    return targetUrl;
   });
+
+  private preloadSheetMusicImage(url: string): void {
+    if (typeof Image === 'undefined' || !url || this.sheetMusicImageCache.has(url)) return;
+    const img = new Image();
+    img.src = url;
+    this.sheetMusicImageCache.set(url, img);
+  }
 
   /** Computed list of notes attached to currently displayed hymn */
   readonly currentNotes = computed<Note[]>(() => {
