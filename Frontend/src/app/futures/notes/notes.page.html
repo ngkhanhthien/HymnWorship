@@ -4,11 +4,39 @@
       <h1 class="page-title">My Sacred Notes</h1>
       <p class="page-subtitle">View and manage all spiritual insights, promptings, and gratitude notes</p>
     </div>
+
+    <!-- Search Notes Container -->
+    <div class="search-notes-container">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Enter keyword & press Enter to search..."
+          [ngModel]="searchQueryInput()"
+          (ngModelChange)="searchQueryInput.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+        @if (searchQueryInput()) {
+          <button type="button" class="clear-search-btn" (click)="clearSearch()" title="Clear search text">✖</button>
+        }
+      </div>
+      <button type="button" class="search-btn" (click)="onSearch()">
+        🔍 Search
+      </button>
+    </div>
   </header>
 
   <main class="notes-page-content">
+    @if (activeSearchQuery()) {
+      <div class="search-result-info">
+        <span>Found <strong>{{ filteredNotes().length }}</strong> note(s) matching "<strong>{{ activeSearchQuery() }}</strong>"</span>
+        <button type="button" class="reset-search-btn" (click)="clearSearch()">Show All Notes ✖</button>
+      </div>
+    }
+
     <app-notes-table
-      [notes]="notes()"
+      [notes]="filteredNotes()"
       [highlightId]="highlightId()"
       (editNote)="onEditNote($event)"
       (deleteNote)="onDeleteNote($event)"

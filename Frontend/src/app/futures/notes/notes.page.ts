@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
 import { NoteService, NoteTableItem } from '../../core/services/note.service';
@@ -20,8 +20,39 @@ export class NotesPageComponent {
   /** All table notes signal from NoteService */
   readonly notes = this.noteService.allNotesItems;
 
+  /** Search query string typed in input */
+  readonly searchQueryInput = signal<string>('');
+
+  /** Active query applied when user presses Enter or clicks Search */
+  readonly activeSearchQuery = signal<string>('');
+
+  /** Filtered notes signal based on activeSearchQuery */
+  readonly filteredNotes = computed<NoteTableItem[]>(() => {
+    const all = this.notes();
+    const query = this.activeSearchQuery().trim().toLowerCase();
+
+    if (!query) return all;
+
+    return all.filter((note) => {
+      const contentMatch = (note.content || '').toLowerCase().includes(query);
+      const hymnMatch = String(note.hymnNumber || '').toLowerCase().includes(query);
+      const topicMatch = (note.topic || '').toLowerCase().includes(query);
+      const dateMatch = (note.date || '').toLowerCase().includes(query);
+      return contentMatch || hymnMatch || topicMatch || dateMatch;
+    });
+  });
+
   /** Highlighted note ID passed from URL query params */
   readonly highlightId = signal<string | null>(null);
+
+  onSearch(): void {
+    this.activeSearchQuery.set(this.searchQueryInput().trim());
+  }
+
+  clearSearch(): void {
+    this.searchQueryInput.set('');
+    this.activeSearchQuery.set('');
+  }
 
   constructor() {
     this.route.queryParams.subscribe((params: Params) => {
