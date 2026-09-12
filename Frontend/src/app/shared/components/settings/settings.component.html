@@ -23,23 +23,6 @@
       </div>
     }
 
-    <!-- Custom Color Picker (Visible when Custom Color theme is selected) -->
-    @if (settingsService.themeMode() === 'custom') {
-      <div class="custom-color-picker-wrapper">
-        <label for="custom-color-input" class="picker-label">Select Primary Accent Color:</label>
-        <div class="picker-input-group">
-          <input
-            id="custom-color-input"
-            type="color"
-            class="color-picker-input"
-            [value]="settingsService.customColor()"
-            (input)="onCustomColorChange($event)"
-          />
-          <span class="color-hex-badge">{{ settingsService.customColor() }}</span>
-        </div>
-      </div>
-    }
-
     <p class="setting-description">
       @for (option of settingsService.themeOptions; track option.value) {
         @if (option.value === settingsService.themeMode()) {

@@ -38,10 +38,4 @@ export class SettingsComponent {
       this.settingsService.setThemeMode(selectedValue);
     }
   }
-
-  onCustomColorChange(event: Event): void {
-    const msg = 'Color Theme customization feature is currently not supported by the application.';
-    this.authService.showToast(msg, 'error');
-    this.themeAttemptMessage.set(msg);
-  }
 }

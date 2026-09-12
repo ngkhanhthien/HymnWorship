@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
 export type DataSourceMode = 'local' | 'firebase';
-export type ThemeMode = 'current' | 'dark' | 'light' | 'custom';
+export type ThemeMode = 'current' | 'dark';
 
 export interface DataSourceOption {
   value: DataSourceMode;
@@ -35,22 +35,12 @@ export class SettingsService {
   readonly themeOptions: readonly ThemeOption[] = [
     {
       value: 'current',
-      label: 'Current Theme (Default)',
+      label: 'Default Theme',
       description: 'Keep the active standard website color palette.',
     },
     {
       value: 'dark',
       label: 'Dark Theme (Unsupported)',
-      description: 'Color theme customization is currently not supported.',
-    },
-    {
-      value: 'light',
-      label: 'Light Theme (Unsupported)',
-      description: 'Color theme customization is currently not supported.',
-    },
-    {
-      value: 'custom',
-      label: 'Custom Color (Unsupported)',
       description: 'Color theme customization is currently not supported.',
     },
   ];
@@ -60,9 +50,6 @@ export class SettingsService {
 
   /** Selected color theme mode, default is 'current' */
   readonly themeMode = signal<ThemeMode>('current');
-
-  /** Custom primary color hex string, default is '#2563eb' */
-  readonly customColor = signal<string>('#2563eb');
 
   constructor() {
     this.applyTheme();
@@ -88,42 +75,12 @@ export class SettingsService {
     return true;
   }
 
-  setCustomColor(hex: string): void {
-    this.customColor.set(hex);
-    this.applyTheme();
-  }
-
   private applyTheme(): void {
     if (typeof document === 'undefined') return;
 
     const mode = this.themeMode();
-    const hex = this.customColor();
     const root = document.documentElement;
 
     root.setAttribute('data-theme', mode);
-
-    if (mode === 'custom') {
-      root.style.setProperty('--custom-primary', hex);
-      root.style.setProperty('--custom-hover', this.adjustColorBrightness(hex, -20));
-      root.style.setProperty('--custom-light', `${hex}20`);
-    } else {
-      root.style.removeProperty('--custom-primary');
-      root.style.removeProperty('--custom-hover');
-      root.style.removeProperty('--custom-light');
-    }
-  }
-
-  private adjustColorBrightness(hex: string, percent: number): string {
-    let num = parseInt(hex.replace('#', ''), 16);
-    if (isNaN(num)) return hex;
-    let r = (num >> 16) + percent;
-    let g = ((num >> 8) & 0x00ff) + percent;
-    let b = (num & 0x0000ff) + percent;
-
-    r = Math.min(255, Math.max(0, r));
-    g = Math.min(255, Math.max(0, g));
-    b = Math.min(255, Math.max(0, b));
-
-    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
   }
 }
