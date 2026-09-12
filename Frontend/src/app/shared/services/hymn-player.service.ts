@@ -5,6 +5,18 @@ import { Hymn } from '../../core/models/hymn';
 export class HymnPlayerService {
   private audio: HTMLAudioElement | null = null;
 
+  /** Maximum number of audio tracks kept in RAM (15 tracks ~45MB max RAM) */
+  private static readonly MAX_CACHE_SIZE = 15;
+
+  /** In-memory Blob URL cache map for zero-network audio playback */
+  private readonly audioCacheMap = new Map<string, string>();
+
+  /** FIFO/LRU order tracker for automatic RAM memory cleanup */
+  private readonly audioCacheOrder: string[] = [];
+
+  /** Set of audio URLs currently being preloaded in background */
+  private readonly pendingAudioFetches = new Set<string>();
+
   /** The currently playing hymn object, or null if none */
   readonly currentPlaying = signal<Hymn | null>(null);
 
@@ -48,6 +60,70 @@ export class HymnPlayerService {
     return dur > 0 ? (this.currentTime() / dur) * 100 : 0;
   });
 
+  /** Resolve raw remote audio URL for a hymn and audio mode */
+  resolveAudioUrl(hymn: Hymn, modeOverride?: 'accompaniment' | 'vocal'): string {
+    const FIREBASE_STORAGE_BASE = 'https://storage.googleapis.com/qthymns1.firebasestorage.app';
+    const mode = modeOverride ?? this.selectedAudioMode();
+
+    if (mode === 'vocal') {
+      if (hymn.audio_vocal_url) return hymn.audio_vocal_url;
+      if (hymn.audio_vocal && hymn.audio_vocal.startsWith('http')) return hymn.audio_vocal;
+      return `${FIREBASE_STORAGE_BASE}/audio/vocal/${hymn.number}.mp3`;
+    } else {
+      if (hymn.audio_accompaniment_url) return hymn.audio_accompaniment_url;
+      if (hymn.audio_accompaniment && hymn.audio_accompaniment.startsWith('http')) return hymn.audio_accompaniment;
+      return `${FIREBASE_STORAGE_BASE}/audio/accompaniment/${hymn.number}.mp3`;
+    }
+  }
+
+  /**
+   * Pre-fetch audio Blob in background and store Object URL in RAM memory.
+   * Eliminates repeat Firebase Storage network calls and bandwidth usage.
+   * Enforces LRU memory limit to prevent memory leaks.
+   */
+  async preloadAudio(hymn: Hymn, modeOverride?: 'accompaniment' | 'vocal'): Promise<string> {
+    if (!hymn) return '';
+    const rawUrl = this.resolveAudioUrl(hymn, modeOverride);
+    if (!rawUrl) return rawUrl;
+
+    if (this.audioCacheMap.has(rawUrl)) {
+      return this.audioCacheMap.get(rawUrl)!;
+    }
+
+    if (this.pendingAudioFetches.has(rawUrl)) {
+      return rawUrl;
+    }
+
+    try {
+      this.pendingAudioFetches.add(rawUrl);
+      const res = await fetch(rawUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      // LRU Eviction: revoke oldest Blob Object URL if cache size exceeds limit
+      if (this.audioCacheOrder.length >= HymnPlayerService.MAX_CACHE_SIZE) {
+        const oldestUrl = this.audioCacheOrder.shift();
+        if (oldestUrl && this.audioCacheMap.has(oldestUrl)) {
+          const oldObjectUrl = this.audioCacheMap.get(oldestUrl);
+          if (oldObjectUrl) {
+            URL.revokeObjectURL(oldObjectUrl); // Release RAM memory back to OS
+          }
+          this.audioCacheMap.delete(oldestUrl);
+        }
+      }
+
+      this.audioCacheMap.set(rawUrl, blobUrl);
+      this.audioCacheOrder.push(rawUrl);
+      return blobUrl;
+    } catch (e) {
+      console.warn(`Audio preload fallback for ${rawUrl}:`, e);
+      return rawUrl;
+    } finally {
+      this.pendingAudioFetches.delete(rawUrl);
+    }
+  }
+
   play(hymn: Hymn, playlist?: Hymn[]): void {
     if (playlist && playlist.length > 0) {
       this.currentPlaylist.set(playlist);
@@ -72,31 +148,18 @@ export class HymnPlayerService {
     // Stop and cleanup existing audio
     this.stopAudio();
 
-    // Determine audio URL based on selected audio mode
-    const FIREBASE_STORAGE_BASE = 'https://storage.googleapis.com/qthymns1.firebasestorage.app';
-    let audioUrl = '';
+    // Resolve audio URL and check in-memory Blob cache
     const mode = this.selectedAudioMode();
+    const rawAudioUrl = this.resolveAudioUrl(hymn, mode);
+    const playbackUrl = this.audioCacheMap.get(rawAudioUrl) || rawAudioUrl;
 
-    if (mode === 'vocal') {
-      if (hymn.audio_vocal_url) {
-        audioUrl = hymn.audio_vocal_url;
-      } else if (hymn.audio_vocal && hymn.audio_vocal.startsWith('http')) {
-        audioUrl = hymn.audio_vocal;
-      } else {
-        audioUrl = `${FIREBASE_STORAGE_BASE}/audio/vocal/${hymn.number}.mp3`;
-      }
-    } else {
-      if (hymn.audio_accompaniment_url) {
-        audioUrl = hymn.audio_accompaniment_url;
-      } else if (hymn.audio_accompaniment && hymn.audio_accompaniment.startsWith('http')) {
-        audioUrl = hymn.audio_accompaniment;
-      } else {
-        audioUrl = `${FIREBASE_STORAGE_BASE}/audio/accompaniment/${hymn.number}.mp3`;
-      }
+    // Trigger background preload for future plays if not cached
+    if (!this.audioCacheMap.has(rawAudioUrl)) {
+      this.preloadAudio(hymn, mode);
     }
 
     // Create and configure new Audio instance
-    this.audio = new Audio(audioUrl);
+    this.audio = new Audio(playbackUrl);
 
     this.audio.ontimeupdate = () => {
       if (this.audio) {
@@ -133,11 +196,12 @@ export class HymnPlayerService {
       }
     };
     this.audio.onerror = (err) => {
-      console.warn(`Could not load audio from ${audioUrl}:`, err);
+      console.warn(`Could not load audio from ${playbackUrl}:`, err);
       if (mode === 'vocal') {
-        const fallbackUrl = hymn.audio_accompaniment_url || `${FIREBASE_STORAGE_BASE}/audio/accompaniment/${hymn.number}.mp3`;
+        const fallbackUrl = this.resolveAudioUrl(hymn, 'accompaniment');
         console.info(`Falling back to accompaniment audio: ${fallbackUrl}`);
-        this.audio = new Audio(fallbackUrl);
+        const cachedFallback = this.audioCacheMap.get(fallbackUrl) || fallbackUrl;
+        this.audio = new Audio(cachedFallback);
         this.audio.play().catch((e) => console.warn('Fallback play error:', e));
         return;
       }

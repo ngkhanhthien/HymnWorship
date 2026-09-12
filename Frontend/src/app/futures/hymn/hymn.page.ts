@@ -140,8 +140,9 @@ export class HymnPageComponent {
       targetUrl = hymn.sheet_music[0];
     }
 
-    // Preload image in memory cache for instant rendering when re-opening
+    // Preload image & audio in memory cache for instant rendering & 0 network calls when playing
     this.preloadSheetMusicImage(targetUrl);
+    this.playerService.preloadAudio(hymn);
     return targetUrl;
   });
 
