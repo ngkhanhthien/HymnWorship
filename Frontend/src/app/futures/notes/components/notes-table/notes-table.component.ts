@@ -15,6 +15,18 @@ export class NotesTableComponent {
 
   @Input() notes: NoteTableItem[] = [];
 
+  @Input() set highlightId(id: string | null) {
+    if (id) {
+      this.expandedNoteIds.add(id);
+      setTimeout(() => {
+        const el = document.getElementById('note-row-' + id);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 150);
+    }
+  }
+
   @Output() editNote = new EventEmitter<NoteTableItem>();
   @Output() deleteNote = new EventEmitter<string>();
 

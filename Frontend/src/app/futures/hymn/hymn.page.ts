@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, ParamMap, RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, ParamMap, RouterModule, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { HymnDataService } from '../../core/services/hymn-data.service';
 import { HymnPlayerService } from '../../shared/services/hymn-player.service';
@@ -22,10 +22,16 @@ import { formatDateKey } from '../../core/utils/random.util';
 })
 export class HymnPageComponent {
   private readonly route = inject(ActivatedRoute);
-  private readonly playerService = inject(HymnPlayerService);
+  private readonly router = inject(Router);
   private readonly scheduleService = inject(ScheduleService);
+  protected readonly playerService = inject(HymnPlayerService);
   private readonly noteService = inject(NoteService);
   private readonly hymnDataService = inject(HymnDataService);
+
+  goToNoteDetail(noteId: string): void {
+    if (!noteId) return;
+    this.router.navigate(['/notes'], { queryParams: { highlight: noteId } });
+  }
 
   /** Track note ID pending deletion confirmation */
   readonly noteIdToDelete = signal<string | null>(null);

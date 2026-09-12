@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { HymnItemComponent } from '../../shared/components/hymn-items/hymn-item.component';
 import { CalendarComponent } from '../../shared/components/calendar/calendar';
 import { ScheduleService } from '../../core/services/schedule.service';
@@ -19,9 +19,15 @@ export interface HomeNoteDisplayItem extends NoteTableItem {
   templateUrl: './home.page.html',
 })
 export class HomePageComponent {
+  private readonly router = inject(Router);
   private readonly scheduleService = inject(ScheduleService);
   private readonly noteService = inject(NoteService);
   protected readonly playerService = inject(HymnPlayerService);
+
+  goToNoteDetail(noteId: string): void {
+    if (!noteId) return;
+    this.router.navigate(['/notes'], { queryParams: { highlight: noteId } });
+  }
 
   /** Reactive signal returning sequential main hymn + 3 suggestions for the selected date on calendar */
   readonly scheduledHymns = this.scheduleService.selectedDayHymns;

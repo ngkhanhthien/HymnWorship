@@ -17,11 +17,13 @@
         <ul class="space-y-2.5 text-gray-600 text-sm overflow-y-auto flex-1 min-h-[140px] pr-1">
           @for (note of homeBriefNotes(); track note.id) {
             <li
-              class="flex flex-col gap-1 p-2.5 rounded-lg border transition"
+              class="flex flex-col gap-1 p-2.5 rounded-lg border transition cursor-pointer hover:shadow-md"
               [ngClass]="{
-                'bg-pink-100/70 border-pink-300 shadow-xs ring-1 ring-pink-200': note.isDefaultHymnNote,
-                'bg-pink-50/50 border-pink-100 hover:bg-pink-100/50': !note.isDefaultHymnNote
+                'bg-pink-100/70 border-pink-300 shadow-xs ring-1 ring-pink-200 hover:bg-pink-200/70': note.isDefaultHymnNote,
+                'bg-pink-50/50 border-pink-100 hover:bg-pink-100/80': !note.isDefaultHymnNote
               }"
+              (click)="goToNoteDetail(note.id)"
+              title="Click to view full note details on Notes page"
             >
               <div class="flex items-center justify-between text-xs">
                 <div class="flex items-center gap-1.5">

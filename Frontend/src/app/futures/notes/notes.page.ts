@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Params } from '@angular/router';
 import { NoteService, NoteTableItem } from '../../core/services/note.service';
 import { NoteTopic } from '../../core/models/note';
 import { NotesTableComponent } from './components/notes-table/notes-table.component';
@@ -14,9 +15,22 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal/con
 })
 export class NotesPageComponent {
   private readonly noteService = inject(NoteService);
+  private readonly route = inject(ActivatedRoute);
 
   /** All table notes signal from NoteService */
   readonly notes = this.noteService.allNotesItems;
+
+  /** Highlighted note ID passed from URL query params */
+  readonly highlightId = signal<string | null>(null);
+
+  constructor() {
+    this.route.queryParams.subscribe((params: Params) => {
+      const id = params['highlight'] || params['id'] || params['noteId'];
+      if (id) {
+        this.highlightId.set(String(id));
+      }
+    });
+  }
 
   /** Track note ID pending deletion confirmation */
   readonly noteIdToDelete = signal<string | null>(null);

@@ -138,12 +138,12 @@
         <p class="notes-history-label">Note history:</p>
         <ul class="notes-list">
           @for (note of currentNotes(); track note.id) {
-            <li class="note-item">
+            <li class="note-item note-item-clickable" (click)="goToNoteDetail(note.id)" title="Click to view full note details on Notes page">
               <div class="note-content-group">
                 <span class="topic-tag" [attr.data-topic]="note.topic">[{{ note.topic }}]</span>
                 <span class="note-text">{{ note.content }}</span>
               </div>
-              <button class="note-delete" [disabled]="isDeletingNote()" (click)="onDeleteNote(note.id)">✖</button>
+              <button class="note-delete" [disabled]="isDeletingNote()" (click)="$event.stopPropagation(); onDeleteNote(note.id)">✖</button>
             </li>
           } @empty {
             <li class="empty-notes-msg">No notes added for this song today yet.</li>

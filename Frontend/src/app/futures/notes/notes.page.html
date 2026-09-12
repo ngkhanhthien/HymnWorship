@@ -9,6 +9,7 @@
   <main class="notes-page-content">
     <app-notes-table
       [notes]="notes()"
+      [highlightId]="highlightId()"
       (editNote)="onEditNote($event)"
       (deleteNote)="onDeleteNote($event)"
     />

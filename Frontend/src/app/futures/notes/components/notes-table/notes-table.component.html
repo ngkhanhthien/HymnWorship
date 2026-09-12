@@ -15,6 +15,7 @@
     <tbody>
       @for (item of notes; track item.id) {
         <tr
+          [id]="'note-row-' + item.id"
           class="table-row"
           [class.is-expanded]="isExpanded(item.id)"
           (click)="toggleExpand(item.id)"
