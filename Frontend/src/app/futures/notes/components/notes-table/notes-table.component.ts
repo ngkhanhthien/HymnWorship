@@ -49,4 +49,21 @@ export class NotesTableComponent {
       return '';
     }
   }
+
+  formatLastEdited(isoStr?: string): string {
+    if (!isoStr) return '—';
+    try {
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return '—';
+      return d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }) + ', ' + d.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return '—';
+    }
+  }
 }

@@ -23,6 +23,7 @@ export interface NoteTableItem {
   topic: NoteTopic;
   content: string;
   createdAt?: string;
+  updatedAt?: string;
   userId?: string;
 }
 
@@ -112,6 +113,7 @@ export class NoteService {
               topic: data['topic'] || NoteTopic.MIT,
               content: data['content'] || '',
               createdAt: data['createdAt'] || new Date().toISOString(),
+              updatedAt: data['updatedAt'] || undefined,
             });
           });
 
@@ -148,6 +150,7 @@ export class NoteService {
               topic: note.topic || NoteTopic.MIT,
               content: note.content || '',
               createdAt: note.createdAt,
+              updatedAt: note.updatedAt,
               userId: note.userId || day.userId,
             });
           }

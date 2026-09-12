@@ -9,7 +9,8 @@ export interface Note {
   userId?: string; // Owner user ID or account name
   topic: NoteTopic; // Enum restricted to 'MIT' | 'Promptings' | 'Gratitude'
   content: string;
-  createdAt?: string; // Optional ISO timestamp string
+  createdAt?: string; // Optional ISO timestamp string for creation time
+  updatedAt?: string; // Optional ISO timestamp string for last edit time
 }
 
 export interface Day {
