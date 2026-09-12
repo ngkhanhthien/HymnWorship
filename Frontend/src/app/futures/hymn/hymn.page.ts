@@ -146,15 +146,35 @@ export class HymnPageComponent {
     this.sheetMusicImageCache.set(url, img);
   }
 
-  /** Computed list of notes attached to currently displayed hymn */
+  /** Computed list of notes attached to currently displayed hymn (newest first) */
   readonly currentNotes = computed<Note[]>(() => {
-    const hymnNum = this.displayHymn().number;
+    const hymn = this.displayHymn();
+    const hymnNum = hymn?.number ?? hymn?.id;
+    if (hymnNum === undefined || hymnNum === null) return [];
+
     const days = this.noteService.daysSignal();
-    const todayStr = formatDateKey(new Date());
-    const day = days.find(
-      (d) => String(d.hymnNumber) === String(hymnNum) && d.date === todayStr
+    if (!Array.isArray(days)) return [];
+
+    const targetHymnStr = String(hymnNum);
+
+    // Aggregate notes from all day records matching this hymn number
+    const matchingDays = days.filter(
+      (d) => d && d.hymnNumber !== undefined && String(d.hymnNumber) === targetHymnStr
     );
-    return day && Array.isArray(day.notes) ? day.notes : [];
+
+    const allNotes: Note[] = [];
+    for (const day of matchingDays) {
+      if (Array.isArray(day.notes)) {
+        allNotes.push(...day.notes);
+      }
+    }
+
+    // Sort newest notes first
+    return allNotes.sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
   });
 
   selectTab(tab: 'pdf' | 'lyrics'): void {
@@ -189,10 +209,13 @@ export class HymnPageComponent {
     const content = this.noteContent().trim();
     if (!content || this.isSubmittingNote()) return;
 
+    const hymn = this.displayHymn();
+    const hymnNum = hymn?.number ?? hymn?.id ?? 0;
+
     this.isSubmittingNote.set(true);
     try {
       await this.noteService.addNote(
-        this.displayHymn().number,
+        hymnNum,
         this.selectedTopic(),
         content
       );
