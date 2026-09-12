@@ -299,20 +299,69 @@
 
 .note-input-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
   padding: 8px 10px;
   background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.note-input {
+.note-input-wrapper:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.note-textarea {
   border: none;
   outline: none;
   flex: 1;
   font-size: 13px;
   color: #333;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.add-note-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12.5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.add-note-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.add-note-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .notes-history {
@@ -344,7 +393,7 @@
 .note-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 4px;
@@ -356,7 +405,7 @@
 
 .note-content-group {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   flex: 1;
   overflow: hidden;
@@ -369,6 +418,7 @@
   border-radius: 4px;
   text-transform: uppercase;
   flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .topic-tag[data-topic="MIT"] {
@@ -388,9 +438,9 @@
 
 .note-text {
   flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
 }
 
 .empty-notes-msg {

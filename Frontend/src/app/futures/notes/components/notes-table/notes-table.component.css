@@ -40,7 +40,11 @@
 .col-time { width: 110px; }
 .col-hymn { width: 90px; }
 .col-topic { width: 130px; }
-.col-content { min-width: 220px; }
+.col-content {
+  min-width: 220px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .col-updated { width: 140px; }
 .col-actions { width: 100px; text-align: center; }
 

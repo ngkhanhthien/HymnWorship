@@ -178,6 +178,13 @@ export class HymnPageComponent {
   /** Track note deletion loading state */
   readonly isDeletingNote = signal<boolean>(false);
 
+  onNoteKeyDown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      event.preventDefault();
+      this.onAddNote();
+    }
+  }
+
   async onAddNote(): Promise<void> {
     const content = this.noteContent().trim();
     if (!content || this.isSubmittingNote()) return;

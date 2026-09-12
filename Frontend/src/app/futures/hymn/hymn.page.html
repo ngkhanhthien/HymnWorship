@@ -109,17 +109,29 @@
         </div>
 
         <div class="note-input-wrapper">
-          <span class="note-icon">{{ isSubmittingNote() ? '⏳' : '✏️' }}</span>
-          <input
-            class="note-input"
-            type="text"
+          <textarea
+            class="note-textarea"
+            rows="3"
             [disabled]="isSubmittingNote()"
-            [placeholder]="isSubmittingNote() ? 'Saving note...' : 'Add a new note and press Enter...'"
+            [placeholder]="isSubmittingNote() ? 'Saving note...' : 'Write note... (Press Enter for new line, Ctrl+Enter to submit)'"
             [ngModel]="noteContent()"
             (ngModelChange)="noteContent.set($event)"
-            (keyup.enter)="onAddNote()"
-          />
+            (keydown)="onNoteKeyDown($event)"
+          ></textarea>
         </div>
+
+        <button
+          type="button"
+          class="add-note-btn"
+          [disabled]="isSubmittingNote() || !noteContent().trim()"
+          (click)="onAddNote()"
+        >
+          @if (isSubmittingNote()) {
+            <span class="btn-spinner"></span> Saving...
+          } @else {
+            ➕ Add Note
+          }
+        </button>
       </div>
 
       <div class="notes-history">
