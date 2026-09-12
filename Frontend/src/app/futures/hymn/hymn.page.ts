@@ -45,6 +45,45 @@ export class HymnPageComponent {
   /** Currently selected scripture for right-side drawer view */
   readonly selectedScripture = signal<ScriptureRef | null>(null);
 
+  /** Floating resizable sheet music window mode state */
+  readonly isFloatingSheet = signal<boolean>(false);
+
+  /** Width of the floating sheet window in pixels */
+  readonly floatingWidth = signal<number>(850);
+
+  toggleFloatingSheet(): void {
+    if (!this.isFloatingSheet() && typeof window !== 'undefined') {
+      const defaultW = Math.max(500, window.innerWidth - 380);
+      this.floatingWidth.set(defaultW);
+    }
+    this.isFloatingSheet.update((v) => !v);
+  }
+
+  // Mouse drag resize handling for right border handle
+  private isResizingFloating = false;
+
+  startFloatingResize(event: MouseEvent): void {
+    event.preventDefault();
+    this.isResizingFloating = true;
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!this.isResizingFloating || typeof window === 'undefined') return;
+      const maxWidth = window.innerWidth - 360; // Guarantee right panel is never covered
+      const minWidth = 350;
+      const newWidth = Math.min(Math.max(e.clientX, minWidth), maxWidth);
+      this.floatingWidth.set(newWidth);
+    };
+
+    const onMouseUp = () => {
+      this.isResizingFloating = false;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }
+
   /** Track image load error state */
   readonly imageError = signal<boolean>(false);
 

@@ -38,6 +38,13 @@
   min-width: 300px;
 }
 
+.panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .panel-title-badge {
   display: inline-flex;
   align-items: center;
@@ -54,6 +61,36 @@
 
 .badge-icon {
   font-size: 16px;
+}
+
+.expand-sheet-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
+}
+
+.expand-sheet-btn:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+.expand-sheet-btn.active {
+  background: #dc2626;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+
+.expand-sheet-btn.active:hover {
+  background: #b91c1c;
 }
 
 .tab-body {
@@ -621,3 +658,96 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
+
+/* ── Floating Resizable Sheet Window ── */
+.floating-sheet-window {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  background: #ffffff;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 8px 0 32px rgba(0, 0, 0, 0.25);
+  border-right: 2px solid #cbd5e1;
+  box-sizing: border-box;
+}
+
+.floating-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -6px;
+  width: 12px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 1010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.floating-resize-handle:hover,
+.floating-resize-handle:active {
+  background: rgba(59, 130, 246, 0.3);
+}
+
+.resize-handle-bar {
+  width: 4px;
+  height: 48px;
+  background: #94a3b8;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.floating-resize-handle:hover .resize-handle-bar {
+  background: #2563eb;
+}
+
+.floating-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  z-index: 1020;
+  background: rgba(220, 38, 38, 0.9);
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.floating-close-btn:hover {
+  background: #dc2626;
+  transform: scale(1.04);
+}
+
+.floating-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #ffffff;
+}
+
+.floating-sheet-img {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0;
+  margin: 0;
+  display: block;
+  box-shadow: none;
+  background: #ffffff;
+}
+

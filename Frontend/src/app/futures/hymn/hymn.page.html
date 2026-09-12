@@ -2,9 +2,24 @@
   <!-- Left: Content Panel (Sheet Music) -->
   <section class="hymn-content-panel">
     <div class="panel-header-row">
-      <div class="panel-title-badge">
-        <span class="badge-icon">🎼</span>
-        <span class="badge-text">PDF Sheet Music</span>
+      <div class="panel-header-left">
+        <div class="panel-title-badge">
+          <span class="badge-icon">🎼</span>
+          <span class="badge-text">PDF Sheet Music</span>
+        </div>
+        <button
+          type="button"
+          class="expand-sheet-btn"
+          [class.active]="isFloatingSheet()"
+          (click)="toggleFloatingSheet()"
+          title="Toggle Floating Resizable Sheet Music View"
+        >
+          @if (isFloatingSheet()) {
+            <span>🔙 Normal View</span>
+          } @else {
+            <span>⤢ Expand Sheet</span>
+          }
+        </button>
       </div>
       <!-- Hymn item positioned at top right of the left column -->
       <div class="top-right-hymn">
@@ -27,6 +42,42 @@
       </div>
     </div>
   </section>
+
+  <!-- Floating Resizable Sheet Music Window (Covers Left & Header, leaves Right Devotional & Notes Panel usable) -->
+  @if (isFloatingSheet()) {
+    <div
+      class="floating-sheet-window"
+      [style.width.px]="floatingWidth()"
+    >
+      <!-- Right border resize drag handle -->
+      <div
+        class="floating-resize-handle"
+        (mousedown)="startFloatingResize($event)"
+        title="Drag right border to resize sheet music window width"
+      >
+        <div class="resize-handle-bar"></div>
+      </div>
+
+      <!-- Clean Floating Close Button -->
+      <button
+        type="button"
+        class="floating-close-btn"
+        (click)="toggleFloatingSheet()"
+        title="Exit floating view and return to normal layout"
+      >
+        ✖ Exit Floating View
+      </button>
+
+      <div class="floating-body">
+        <img
+          [src]="sheetMusicUrl()"
+          [alt]="displayHymn().title + ' Sheet Music'"
+          class="floating-sheet-img"
+          (error)="onImageError($event)"
+        />
+      </div>
+    </div>
+  }
 
   <!-- Right: Devotional & Notes Panel -->
   <aside class="hymn-notes-panel">
